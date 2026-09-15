@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paimon's Celestial Observatory - Genshin Impact AI Assistant</title>
+    <title>Paimon's Celestial Observatory - Hugging Face Genshin Assistant</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -118,7 +118,7 @@
             background: rgba(251, 191, 36, 0.6);
         }
 
-        /* Celestial Gradient Text */
+        /* Gradient Text Effects */
         .gradient-text-gold {
             background: linear-gradient(135deg, #fffbeb 0%, #fcd34d 50%, #f59e0b 100%);
             -webkit-background-clip: text;
@@ -169,7 +169,7 @@
                 </h1>
                 <p class="text-xs text-celestial-cyan/80 flex items-center gap-2">
                     <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Teyvat Archival Assistant & Fact-Checker
+                    Hugging Face Inference & Genshin Wiki Grounding
                 </p>
             </div>
         </div>
@@ -188,10 +188,10 @@
                 <i id="audio-icon" class="fa-solid fa-volume-high"></i>
             </button>
 
-            <!-- Settings Button -->
+            <!-- Hugging Face Settings Button -->
             <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl glass-panel border-celestial-gold/40 text-celestial-gold text-xs font-semibold flex items-center gap-2 hover:bg-celestial-gold/10 hover:border-celestial-gold transition-all">
-                <i class="fa-solid fa-key"></i>
-                <span class="hidden md:inline">API Settings</span>
+                <i class="fa-solid fa-cube"></i>
+                <span class="hidden md:inline">HF Token & Model</span>
             </button>
         </div>
     </header>
@@ -238,7 +238,7 @@
                     <button onclick="sendPreset('Explain how Elemental Reactions like Vaporize, Melt, and Bloom work in Genshin Impact.')" class="p-2.5 rounded-xl bg-celestial-800/50 hover:bg-celestial-700/60 border border-celestial-cyan/20 hover:border-celestial-cyan/60 text-xs text-left text-gray-200 hover:text-white transition-all flex items-center justify-between group">
                         <span class="flex items-center gap-2">
                             <i class="fa-solid fa-bolt text-purple-400 group-hover:scale-110 transition-transform"></i>
-                            Elemental Reactions Cheatsheet
+                            Elemental Reactions Guide
                         </span>
                         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400 group-hover:translate-x-1 transition-transform"></i>
                     </button>
@@ -268,8 +268,8 @@
                 </div>
 
                 <div class="flex items-center justify-between text-xs py-1 border-b border-white/5">
-                    <span class="text-gray-400">Search Protocol:</span>
-                    <span class="text-emerald-400 font-medium">Active RAG</span>
+                    <span class="text-gray-400">Active Model:</span>
+                    <span id="active-model-badge" class="text-celestial-gold font-mono text-[11px] truncate max-w-[140px]" title="Qwen/Qwen2.5-72B-Instruct">Qwen2.5-72B</span>
                 </div>
 
                 <div class="flex items-center justify-between text-xs py-1">
@@ -306,7 +306,7 @@
                             Paimon
                             <span class="text-[10px] px-2 py-0.5 rounded-full bg-celestial-gold/20 text-celestial-gold font-normal">Teyvat Guide</span>
                         </h3>
-                        <p id="paimon-subtext" class="text-[11px] text-gray-300">"Paimon is ready to search the archives for you!"</p>
+                        <p id="paimon-subtext" class="text-[11px] text-gray-300">"Paimon is ready to search the archives via Hugging Face!"</p>
                     </div>
                 </div>
 
@@ -327,7 +327,7 @@
                     <div class="flex flex-col gap-2">
                         <div class="glass-panel-gold rounded-2xl rounded-tl-sm p-4 text-sm text-gray-100 shadow-lg border-celestial-gold/30">
                             <p class="font-semibold text-celestial-gold mb-1">Ehe! Greetings, Traveler!</p>
-                            <p>Paimon's Celestial Observatory is up and running! Ask Paimon anything about Genshin Impact—characters, weapons, talent materials, artifacts, or lore! Paimon will directly check the official Genshin Impact Wiki archives to make sure you get 100% accurate information!</p>
+                            <p>Paimon's Celestial Observatory is now powered by Hugging Face Inference API! Ask Paimon anything about Genshin Impact—characters, weapons, talent materials, artifacts, or lore! Paimon will directly search the official Genshin Impact Wiki archives to keep all facts 100% accurate!</p>
                         </div>
                         <span class="text-[10px] text-gray-400 px-1">Paimon • Just now</span>
                     </div>
@@ -375,7 +375,7 @@
 
     </main>
 
-    <!-- Settings Modal -->
+    <!-- Hugging Face Settings Modal -->
     <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md hidden transition-all duration-300">
         <div class="glass-panel-gold rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl relative border-celestial-gold/50 animate-float">
             
@@ -385,48 +385,58 @@
 
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-xl bg-celestial-gold/20 border border-celestial-gold/40 flex items-center justify-center text-celestial-gold">
-                    <i class="fa-solid fa-key text-lg"></i>
+                    <i class="fa-solid fa-cube text-lg"></i>
                 </div>
                 <div>
-                    <h3 class="genshin-font text-lg font-bold text-celestial-gold">Gemini API Key Settings</h3>
-                    <p class="text-xs text-gray-300">Enter your Google Gemini API key to power Paimon</p>
+                    <h3 class="genshin-font text-lg font-bold text-celestial-gold">Hugging Face API Settings</h3>
+                    <p class="text-xs text-gray-300">Enter your Hugging Face Access Token & select LLM</p>
                 </div>
             </div>
 
             <div class="flex flex-col gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">API Key</label>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">User Access Token (<code class="text-celestial-gold">hf_...</code>)</label>
                     <div class="relative">
                         <input 
                             type="password" 
-                            id="api-key-input" 
-                            placeholder="AIzaSy..." 
-                            class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white pr-10 focus:outline-none"
+                            id="hf-token-input" 
+                            placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx" 
+                            class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white pr-10 focus:outline-none font-mono text-xs"
                         >
-                        <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-3 top-2.5 text-gray-400 hover:text-white text-xs">
+                        <button type="button" onclick="toggleTokenVisibility()" class="absolute right-3 top-2.5 text-gray-400 hover:text-white text-xs">
                             <i id="eye-icon" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
-                    <p class="text-[11px] text-gray-400 mt-1">
-                        Your API key is saved safely in your browser's <code class="text-celestial-cyan">localStorage</code>.
+                    <p class="text-[11px] text-gray-400 mt-1 flex items-center justify-between">
+                        <span>Saved locally in browser storage.</span>
+                        <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" class="text-celestial-cyan underline hover:text-cyan-300">
+                            Get Token <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        </a>
                     </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Hugging Face Model Endpoint</label>
+                    <select id="hf-model-select" class="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-white bg-celestial-900 border border-celestial-cyan/30 focus:outline-none">
+                        <option value="Qwen/Qwen2.5-72B-Instruct">Qwen/Qwen2.5-72B-Instruct (Recommended)</option>
+                        <option value="meta-llama/Llama-3.1-8B-Instruct">meta-llama/Llama-3.1-8B-Instruct</option>
+                        <option value="mistralai/Mistral-7B-Instruct-v0.3">mistralai/Mistral-7B-Instruct-v0.3</option>
+                    </select>
                 </div>
 
                 <div class="p-3 rounded-xl bg-celestial-900/60 border border-celestial-cyan/20 text-xs text-gray-300 flex flex-col gap-1">
                     <span class="font-bold text-celestial-cyan flex items-center gap-1">
-                        <i class="fa-solid fa-circle-info"></i> Model Engine:
+                        <i class="fa-solid fa-circle-info"></i> Endpoint Routing:
                     </span>
-                    <span>Using <code class="text-celestial-gold">gemini-3-flash-preview</code> for fast, grounded answers.</span>
+                    <span>Using <code class="text-celestial-gold">router.huggingface.co/v1/chat/completions</code></span>
                 </div>
-
-                <div id="api-key-status" class="hidden p-2.5 rounded-xl text-xs font-medium"></div>
 
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 hover:bg-white/5 transition-all">
                         Cancel
                     </button>
-                    <button onclick="saveApiKey()" class="px-5 py-2 rounded-xl bg-celestial-gold hover:bg-amber-400 text-celestial-900 font-bold text-xs shadow-md transition-all">
-                        Save Key
+                    <button onclick="saveSettings()" class="px-5 py-2 rounded-xl bg-celestial-gold hover:bg-amber-400 text-celestial-900 font-bold text-xs shadow-md transition-all">
+                        Save Settings
                     </button>
                 </div>
             </div>
@@ -732,10 +742,19 @@
     </script>
 
     <script>
-        /* Gemini API Integration & Chat State */
-        let apiKey = localStorage.getItem('paimon_gemini_api_key') || '';
+        /* Hugging Face API Integration & Chat State */
+        let hfToken = localStorage.getItem('paimon_hf_token') || '';
+        let hfModel = localStorage.getItem('paimon_hf_model') || 'Qwen/Qwen2.5-72B-Instruct';
         let isFactCheckStrict = true;
-        let chatHistory = [];
+
+        function updateModelDisplay() {
+            const el = document.getElementById('active-model-badge');
+            if (el) {
+                const shortName = hfModel.split('/')[1] || hfModel;
+                el.textContent = shortName;
+                el.title = hfModel;
+            }
+        }
 
         function toggleFactCheckMode() {
             isFactCheckStrict = !isFactCheckStrict;
@@ -756,7 +775,8 @@
         }
 
         function openSettingsModal() {
-            document.getElementById('api-key-input').value = apiKey;
+            document.getElementById('hf-token-input').value = hfToken;
+            document.getElementById('hf-model-select').value = hfModel;
             document.getElementById('settings-modal').classList.remove('hidden');
         }
 
@@ -764,8 +784,8 @@
             document.getElementById('settings-modal').classList.add('hidden');
         }
 
-        function toggleApiKeyVisibility() {
-            const input = document.getElementById('api-key-input');
+        function toggleTokenVisibility() {
+            const input = document.getElementById('hf-token-input');
             const icon = document.getElementById('eye-icon');
             if (input.type === 'password') {
                 input.type = 'text';
@@ -776,15 +796,23 @@
             }
         }
 
-        function saveApiKey() {
-            const val = document.getElementById('api-key-input').value.trim();
-            if (!val) {
-                showToast('Please enter a valid Gemini API Key', 'error');
+        function saveSettings() {
+            const tokenVal = document.getElementById('hf-token-input').value.trim();
+            const modelVal = document.getElementById('hf-model-select').value;
+
+            if (!tokenVal) {
+                showToast('Please enter a valid Hugging Face Token', 'error');
                 return;
             }
-            apiKey = val;
-            localStorage.setItem('paimon_gemini_api_key', apiKey);
-            showToast('Gemini API Key saved successfully!');
+
+            hfToken = tokenVal;
+            hfModel = modelVal;
+
+            localStorage.setItem('paimon_hf_token', hfToken);
+            localStorage.setItem('paimon_hf_model', hfModel);
+
+            updateModelDisplay();
+            showToast('Hugging Face settings saved successfully!');
             closeSettingsModal();
         }
 
@@ -813,7 +841,6 @@
         }
 
         function clearChatHistory() {
-            chatHistory = [];
             const container = document.getElementById('chat-container');
             container.innerHTML = `
                 <div class="flex gap-3 max-w-3xl">
@@ -839,6 +866,12 @@
 
             if (!query) return;
 
+            if (!hfToken) {
+                openSettingsModal();
+                showToast('Please enter your Hugging Face Token to proceed.', 'error');
+                return;
+            }
+
             audioEngine.playSend();
             inputEl.value = '';
 
@@ -858,55 +891,57 @@
                 document.getElementById('last-searched-tag').textContent = ragResult.sources.map(s => s.title).join(', ');
             }
 
-            // Step 2: Prepare Gemini Call
-            setTyping(true, 'Paimon is synthesizing the facts...');
+            // Step 2: Prepare Hugging Face OpenAI-compatible Chat API Call
+            setTyping(true, `Paimon is synthesizing facts with ${hfModel.split('/')[1] || hfModel}...`);
 
             const paimonSystemPrompt = `You are Paimon, the enthusiastic and energetic companion from Genshin Impact!
 RULES YOU MUST ALWAYS FOLLOW:
-1. Speak in Paimon's signature style: refer to yourself as Paimon in the third person ("Paimon thinks...", "Paimon checked the archives!"), use enthusiastic tone, playful energy, and occasional references to food or treasure!
-2. FACT-CHECKING: You MUST base your answer strictly on official Genshin Impact lore, stats, builds, material requirements, and mechanics provided in the Wiki Context below whenever available.
+1. Speak in Paimon's signature voice: refer to yourself as Paimon in the third person ("Paimon thinks...", "Paimon checked the archives!"), use enthusiastic tone, playful energy, and occasional references to food or treasure! "Ehe!"
+2. FACT-CHECKING (${isFactCheckStrict ? 'STRICT MODE' : 'BALANCED MODE'}): You MUST base your answer strictly on official Genshin Impact lore, stats, builds, material requirements, and mechanics provided in the Wiki Context below.
 3. If the context gives specific talent materials, artifact set bonuses, or weapon stats, state them clearly and accurately!
-4. Format your output clearly using markdown bolding, bullet points, and headers where appropriate.`;
+4. Format your output clearly using markdown bolding, bullet points, and headers.`;
 
             let promptWithContext = `USER QUESTION: ${query}\n\n`;
             if (ragResult.snippets.length > 0) {
-                promptWithContext += `[OFFICIAL GENSHIN IMPACT WIKI RETRIEVED CONTEXT]:\n` + ragResult.snippets.join('\n\n') + `\n\nPlease answer the user using these verified wiki facts!`;
+                promptWithContext += `[OFFICIAL GENSHIN IMPACT WIKI RETRIEVED CONTEXT]:\n` + ragResult.snippets.join('\n\n') + `\n\nPlease answer the user using these verified wiki facts as Paimon!`;
             } else {
                 promptWithContext += `(Note: No direct wiki snippet found, answer using your core Genshin Impact archival knowledge accurately as Paimon!)`;
             }
 
             try {
-                const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const endpoint = 'https://router.huggingface.co/v1/chat/completions';
                 
                 const payload = {
-                    contents: [
-                        {
-                            role: 'user',
-                            parts: [{ text: promptWithContext }]
-                        }
+                    model: hfModel,
+                    messages: [
+                        { role: 'system', content: paimonSystemPrompt },
+                        { role: 'user', content: promptWithContext }
                     ],
-                    systemInstruction: {
-                        parts: [{ text: paimonSystemPrompt }]
-                    }
+                    max_tokens: 1000,
+                    temperature: 0.7
                 };
 
-                const res = await fetch(apiEndpoint, {
+                const res = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Authorization': `Bearer ${hfToken}`,
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(payload)
                 });
 
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
-                    if (res.status === 400 || res.status === 403) {
+                    let errMessage = errData.error?.message || errData.error || `HTTP ${res.status}`;
+                    if (res.status === 401 || res.status === 403) {
                         openSettingsModal();
-                        throw new Error('Invalid or missing API key! Please enter a valid Gemini API key.');
+                        errMessage = 'Unauthorized or invalid Hugging Face token. Please check your token in settings.';
                     }
-                    throw new Error(errData.error?.message || 'Failed to reach Gemini API.');
+                    throw new Error(errMessage);
                 }
 
                 const data = await res.json();
-                const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Paimon couldn't read the stars clearly... Try asking Paimon again!";
+                const aiResponseText = data.choices?.[0]?.message?.content || "Paimon couldn't read the stars clearly... Try asking Paimon again!";
 
                 audioEngine.playChime();
                 renderPaimonMessage(aiResponseText, ragResult.sources);
@@ -1013,9 +1048,10 @@ RULES YOU MUST ALWAYS FOLLOW:
             return html;
         }
 
-        // Initialize API Key check on page load
+        // Initialize display and settings check on page load
         window.addEventListener('load', () => {
-            if (!apiKey) {
+            updateModelDisplay();
+            if (!hfToken) {
                 setTimeout(() => {
                     openSettingsModal();
                 }, 800);

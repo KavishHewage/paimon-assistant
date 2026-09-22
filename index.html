@@ -29,7 +29,7 @@
               blue: '#1c213d',
               deepBg: '#090b16',
               purple: '#9d5bf0',
-              glass: 'rgba(18, 22, 46, 0.75)'
+              glass: 'rgba(18, 22, 46, 0.85)'
             }
           },
           fontFamily: {
@@ -55,15 +55,15 @@
 
     /* Custom Glassmorphism */
     .glass-panel {
-      background: rgba(15, 20, 42, 0.78);
+      background: rgba(15, 20, 42, 0.82);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(243, 203, 99, 0.25);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     }
 
     .glass-input {
-      background: rgba(9, 11, 22, 0.8);
+      background: rgba(9, 11, 22, 0.85);
       border: 1px solid rgba(243, 203, 99, 0.3);
     }
     .glass-input:focus {
@@ -105,9 +105,6 @@
     .text-glow-gold {
       text-shadow: 0 0 10px rgba(243, 203, 99, 0.6), 0 0 20px rgba(243, 203, 99, 0.2);
     }
-    .text-glow-cyan {
-      text-shadow: 0 0 10px rgba(86, 226, 241, 0.6), 0 0 20px rgba(86, 226, 241, 0.2);
-    }
 
     /* Markdown Styling in Messages */
     .prose strong { color: #f3cb63; }
@@ -148,7 +145,7 @@
       </div>
     </div>
 
-    <!-- Header Action Controls -->
+    <!-- Header Controls -->
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- Web Audio Sound Toggle -->
       <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-amber-300 text-xs sm:text-sm flex items-center gap-2 transition-all">
@@ -170,16 +167,14 @@
     </div>
   </header>
 
-  <!-- Main Workspace Layout -->
   <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-    <!-- Left Column: Paimon Interactive Character & Quick Controls -->
+    <!-- Left Column: Paimon Avatar & Inquiries -->
     <section class="lg:col-span-4 flex flex-col gap-4">
       
       <!-- Paimon Card & Dynamic SVG Avatar -->
       <div class="glass-panel rounded-2xl p-5 border border-amber-500/30 flex flex-col items-center text-center relative overflow-hidden">
         
-        <!-- Celestial Star Deco behind avatar -->
         <div class="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -194,9 +189,7 @@
         <!-- SVG Avatar Wrapper -->
         <div class="relative w-48 h-48 sm:w-56 sm:h-56 paimon-float my-2 flex items-center justify-center">
           
-          <!-- Animated SVG Avatar -->
           <svg id="paimonSvg" viewBox="0 0 300 300" class="w-full h-full drop-shadow-[0_10px_20px_rgba(243,203,99,0.25)]">
-            <!-- SVG Definitions -->
             <defs>
               <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffe8a3"/>
@@ -212,15 +205,14 @@
               </filter>
             </defs>
 
-            <!-- Celestial Crown Halo -->
+            <!-- Halo Crown -->
             <g class="halo-glow">
               <ellipse cx="150" cy="52" rx="55" ry="14" fill="none" stroke="url(#goldGrad)" stroke-width="4" filter="url(#glow)"/>
               <polygon points="150,30 154,42 166,42 156,50 160,62 150,54 140,62 144,50 134,42 146,42" fill="#ffe8a3"/>
             </g>
 
-            <!-- Starry Scarf / Cape -->
+            <!-- Cape -->
             <path d="M 80 190 Q 150 215 220 190 Q 235 260 150 280 Q 65 260 80 190 Z" fill="url(#capeGrad)" stroke="#f3cb63" stroke-width="2"/>
-            <!-- Cape Stars -->
             <circle cx="110" cy="230" r="2.5" fill="#56e2f1" />
             <circle cx="190" cy="235" r="2" fill="#ffe8a3" />
             <circle cx="150" cy="250" r="3" fill="#ffffff" />
@@ -229,43 +221,38 @@
             <!-- Hair Back -->
             <path d="M 75 120 C 60 170 85 200 110 205 C 150 210 190 210 230 205 C 255 200 280 170 265 120 C 250 80 200 75 150 75 C 100 75 90 80 75 120 Z" fill="#e2e8f0"/>
 
-            <!-- Head / Face -->
+            <!-- Head -->
             <ellipse cx="150" cy="140" rx="60" ry="52" fill="#fff1e6"/>
 
-            <!-- Front Hair & Bangs -->
+            <!-- Bangs -->
             <path d="M 90 120 Q 120 125 150 100 Q 180 125 210 120 Q 225 140 215 160 C 200 120 180 110 150 112 C 120 110 100 120 85 160 Q 75 140 90 120 Z" fill="#f8fafc"/>
             <path d="M 135 110 Q 150 130 165 110 Q 150 105 135 110 Z" fill="#e2e8f0"/>
-
-            <!-- Crown Clip -->
             <path d="M 100 102 L 115 90 L 125 105 Z" fill="#1c213d" stroke="#f3cb63" stroke-width="2"/>
 
-            <!-- EXPRESSION Dynamic Elements Group -->
+            <!-- DYNAMIC EXPRESSIONS -->
             <g id="paimonFaceGroup">
-              <!-- IDLE EYES (Default) -->
+              <!-- IDLE -->
               <g id="eyeIdle" class="expression-element">
-                <!-- Left Eye -->
                 <ellipse cx="120" cy="142" rx="9" ry="14" fill="#1e1b4b"/>
                 <ellipse cx="120" cy="142" rx="7" ry="11" fill="#4338ca"/>
                 <circle cx="118" cy="137" r="3.5" fill="#ffffff"/>
                 <circle cx="122" cy="147" r="1.5" fill="#56e2f1"/>
-                <!-- Right Eye -->
                 <ellipse cx="180" cy="142" rx="9" ry="14" fill="#1e1b4b"/>
                 <ellipse cx="180" cy="142" rx="7" ry="11" fill="#4338ca"/>
                 <circle cx="178" cy="137" r="3.5" fill="#ffffff"/>
                 <circle cx="182" cy="147" r="1.5" fill="#56e2f1"/>
               </g>
 
-              <!-- THINKING / SEARCHING EYES -->
+              <!-- THINKING -->
               <g id="eyeThinking" class="expression-element hidden">
                 <ellipse cx="122" cy="138" rx="8" ry="12" fill="#1e1b4b"/>
                 <circle cx="120" cy="134" r="3" fill="#ffffff"/>
                 <ellipse cx="182" cy="138" rx="8" ry="12" fill="#1e1b4b"/>
                 <circle cx="180" cy="134" r="3" fill="#ffffff"/>
-                <!-- Floating Question Sparkles -->
                 <text x="205" y="115" fill="#f3cb63" font-size="22" font-weight="bold" font-family="sans-serif">?</text>
               </g>
 
-              <!-- HAPPY / EXCITED EYES -->
+              <!-- HAPPY -->
               <g id="eyeHappy" class="expression-element hidden">
                 <path d="M 110 145 Q 120 132 130 145" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
                 <path d="M 170 145 Q 180 132 190 145" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
@@ -273,62 +260,48 @@
                 <polygon points="225,100 230,110 240,110 232,116 235,126 225,120 215,126 218,116 210,110 220,110" fill="#f3cb63" opacity="0.8"/>
               </g>
 
-              <!-- SHOCKED EYES -->
+              <!-- SHOCKED -->
               <g id="eyeShocked" class="expression-element hidden">
                 <circle cx="120" cy="142" r="12" fill="#ffffff" stroke="#1e1b4b" stroke-width="3"/>
                 <circle cx="120" cy="142" r="3" fill="#1e1b4b"/>
                 <circle cx="180" cy="142" r="12" fill="#ffffff" stroke="#1e1b4b" stroke-width="3"/>
                 <circle cx="180" cy="142" r="3" fill="#1e1b4b"/>
-                <!-- Sweat Drop -->
                 <path d="M 205 125 C 205 120 212 110 212 110 C 212 110 219 120 219 125 C 219 129 216 132 212 132 C 208 132 205 129 205 125 Z" fill="#56e2f1"/>
               </g>
 
-              <!-- EATING EYES -->
+              <!-- EATING -->
               <g id="eyeEating" class="expression-element hidden">
                 <path d="M 110 140 Q 120 148 130 140" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round"/>
                 <path d="M 170 140 Q 180 148 190 140" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round"/>
               </g>
 
-              <!-- CHEEK BLUSH (Shared) -->
               <ellipse cx="105" cy="155" rx="8" ry="4" fill="#f43f5e" opacity="0.4"/>
               <ellipse cx="195" cy="155" rx="8" ry="4" fill="#f43f5e" opacity="0.4"/>
 
               <!-- MOUTHS -->
-              <!-- Idle Mouth -->
               <path id="mouthIdle" class="expression-element" d="M 142 162 Q 150 168 158 162" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
-              
-              <!-- Thinking Mouth -->
               <ellipse id="mouthThinking" class="expression-element hidden" cx="150" cy="165" rx="4" ry="5" fill="#9f1239"/>
-
-              <!-- Happy Mouth -->
               <path id="mouthHappy" class="expression-element hidden" d="M 140 160 Q 150 176 160 160 Z" fill="#9f1239"/>
-
-              <!-- Shocked Mouth -->
               <ellipse id="mouthShocked" class="expression-element hidden" cx="150" cy="166" rx="8" ry="10" fill="#9f1239"/>
-
-              <!-- Eating Mouth & Sticky Honey Roast Item -->
+              
               <g id="mouthEating" class="expression-element hidden">
                 <path d="M 142 163 Q 150 156 158 163" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
-                <!-- Meat Prop -->
                 <g transform="translate(135, 168) rotate(-10) scale(0.7)">
                   <path d="M 10 10 L 35 5 C 45 15 40 30 25 30 L 10 20 Z" fill="#b45309" stroke="#78350f" stroke-width="2"/>
                   <rect x="0" y="15" width="12" height="6" rx="3" fill="#f8fafc" stroke="#cbd5e1"/>
                   <circle cx="28" cy="18" r="3" fill="#f3cb63"/>
                 </g>
               </g>
-
             </g>
           </svg>
         </div>
 
-        <!-- Paimon Persona Quote Bubble -->
         <div class="mt-2 w-full bg-slate-900/90 border border-amber-500/20 rounded-xl p-3 text-xs sm:text-sm text-amber-100/90 italic leading-relaxed">
           <i class="fa-solid fa-quote-left text-amber-400/50 mr-1.5"></i>
           <span id="paimonBannerQuote">"Traveler! Paimon is ready to search the Genshin Wiki Archives! Ask Paimon anything about Teyvat!"</span>
           <i class="fa-solid fa-quote-right text-amber-400/50 ml-1.5"></i>
         </div>
 
-        <!-- Expression Tester Buttons (Interactive Fun) -->
         <div class="mt-4 flex flex-wrap justify-center gap-1.5 w-full">
           <button onclick="setPaimonExpression('idle')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Floating</button>
           <button onclick="setPaimonExpression('happy')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Excited</button>
@@ -338,7 +311,6 @@
         </div>
       </div>
 
-      <!-- Quick Celestial Starter Prompts -->
       <div class="glass-panel rounded-2xl p-4 border border-amber-500/30 flex flex-col gap-2.5">
         <h3 class="font-cinzel text-xs font-bold text-amber-300 tracking-wider flex items-center gap-2">
           <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
@@ -361,16 +333,12 @@
             <span>✨ Primogems & Wish System</span>
             <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
           </button>
-          <button onclick="sendQuickPrompt('What happened in the Fontaine Archon Quest story?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
-            <span>🌊 Fontaine Archon Quest Summary</span>
-            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-          </button>
         </div>
       </div>
 
     </section>
 
-    <!-- Right Column: Interactive Chat Interface & Wiki Context Viewer -->
+    <!-- Right Column: Interactive Chat Interface -->
     <section class="lg:col-span-8 flex flex-col h-[700px] glass-panel rounded-2xl border border-amber-500/30 overflow-hidden shadow-2xl">
       
       <!-- Chat Header -->
@@ -381,9 +349,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Model badge -->
           <span id="currentModelDisplay" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 border border-cyan-500/30">
-            llama-3.3-70b-versatile
+            llama-3.1-8b-instant
           </span>
           <button onclick="clearChat()" title="Clear Observatory Logs" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-trash-can"></i>
@@ -394,7 +361,6 @@
       <!-- Messages Display Area -->
       <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-5">
         
-        <!-- Welcome Paimon Message -->
         <div class="flex items-start gap-3.5 max-w-2xl">
           <div class="w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
             <i class="fa-solid fa-crown text-sm"></i>
@@ -406,21 +372,21 @@
             </div>
             <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-slate-100 text-sm leading-relaxed shadow-lg">
               <p class="mb-2">Greetings, Traveler! Welcome to <strong>Paimon's Celestial Observatory</strong>! ✨</p>
-              <p>Paimon has hooked up this telescope directly to the <strong>Genshin Impact Wiki Archives</strong>! Whenever you ask a question, Paimon will fly through the star archives, gather real wiki entries, and explain everything to you!</p>
-              <p class="mt-2 text-xs text-amber-300/80 italic">Make sure to configure your Groq API Key using the button at the top right to start stargazing!</p>
+              <p>Paimon has updated the observatory telescope to use the <strong>`llama-3.1-8b-instant`</strong> Groq AI engine! Whenever you ask a question, Paimon will scan through the Genshin Impact Wiki Archives, gather real entries, and explain everything to you!</p>
+              <p class="mt-2 text-xs text-amber-300/80 italic">Configure your Groq API Key using the button at the top right to start stargazing!</p>
             </div>
           </div>
         </div>
 
       </div>
 
-      <!-- Live Search/Generation Progress Bar -->
+      <!-- Progress Indicator -->
       <div id="progressIndicator" class="hidden px-5 py-2 bg-slate-900/90 border-t border-amber-500/20 flex items-center gap-3 text-xs text-cyan-300">
         <i class="fa-solid fa-spinner fa-spin text-amber-400"></i>
         <span id="progressText">Gazing into Celestial Stars...</span>
       </div>
 
-      <!-- Sourced Wiki Drawer (Collapsible) -->
+      <!-- Sourced Wiki Drawer -->
       <div id="wikiSourcesDrawer" class="hidden border-t border-amber-500/20 bg-slate-950/90 p-3 max-h-36 overflow-y-auto">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-cinzel text-amber-300 font-bold flex items-center gap-1.5">
@@ -431,9 +397,7 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div id="wikiSourcesContainer" class="flex flex-wrap gap-2">
-          <!-- Dynamic Wiki Pill Links will be injected here -->
-        </div>
+        <div id="wikiSourcesContainer" class="flex flex-wrap gap-2"></div>
       </div>
 
       <!-- Input Form -->
@@ -499,16 +463,16 @@
             </button>
           </div>
           <p class="text-[11px] text-slate-400 mt-1">
-            Get a free API key at <a href="https://console.groq.com/" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">console.groq.com</a>. Stored safely in local browser storage.
+            Get a free API key at <a href="https://console.groq.com/" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">console.groq.com</a>. Stored locally in browser storage.
           </p>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-amber-300 mb-1.5">Select AI Model</label>
+          <label class="block text-xs font-medium text-amber-300 mb-1.5">Active Model Endpoint</label>
           <select id="modelSelect" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none bg-slate-900">
-            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Recommended - High Accuracy)</option>
-            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Super Fast)</option>
-            <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (High Context)</option>
+            <option value="llama-3.1-8b-instant" selected>llama-3.1-8b-instant (Default - Active & Fast)</option>
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (High Reasoning)</option>
+            <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (Large Context)</option>
           </select>
         </div>
 
@@ -524,16 +488,12 @@
     </div>
   </div>
 
-  <!-- Toast Notification Popup Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    /* =========================================================================
-       1. GLOBAL STATE & SYSTEM CONFIGURATION
-       ========================================================================= */
     const STATE = {
       apiKey: localStorage.getItem('paimon_groq_api_key') || '',
-      model: localStorage.getItem('paimon_groq_model') || 'llama-3.3-70b-versatile',
+      model: localStorage.getItem('paimon_groq_model') || 'llama-3.1-8b-instant',
       soundEnabled: true,
       ttsEnabled: false,
       currentExpression: 'idle',
@@ -541,9 +501,6 @@
       chatHistory: []
     };
 
-    /* =========================================================================
-       2. CANVAS STARFIELD & PARALLAX ENGINE
-       ========================================================================= */
     const canvas = document.getElementById('starfieldCanvas');
     const ctx = canvas.getContext('2d');
     
@@ -592,11 +549,9 @@
     function renderStarfield() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Smooth mouse interpolation for parallax
       mouseX += (targetMouseX - mouseX) * 0.05;
       mouseY += (targetMouseY - mouseY) * 0.05;
 
-      // Draw background Nebula radial gradient glow
       const nebulaGrad = ctx.createRadialGradient(
         canvas.width * 0.3 + mouseX * 0.05, 
         canvas.height * 0.3 + mouseY * 0.05, 
@@ -611,15 +566,12 @@
       ctx.fillStyle = nebulaGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Stars and Constellations
       for (let i = 0; i < stars.length; i++) {
         const s = stars[i];
 
-        // Twinkle update
         s.alpha += s.twinkleSpeed;
         if (s.alpha > 1 || s.alpha < 0.2) s.twinkleSpeed = -s.twinkleSpeed;
 
-        // Parallax shift
         const px = s.x + (mouseX - canvas.width / 2) * (s.size * 0.02);
         const py = s.y + (mouseY - canvas.height / 2) * (s.size * 0.02);
 
@@ -630,7 +582,6 @@
         ctx.arc(px, py, s.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // Constellation Lines to nearby stars
         if (i % 8 === 0) {
           for (let j = i + 1; j < i + 4 && j < stars.length; j++) {
             const s2 = stars[j];
@@ -648,7 +599,6 @@
         ctx.restore();
       }
 
-      // Render Shooting Stars
       createShootingStar();
       for (let i = shootingStars.length - 1; i >= 0; i--) {
         const st = shootingStars[i];
@@ -686,9 +636,6 @@
       targetMouseY = e.clientY;
     });
 
-    /* =========================================================================
-       3. WEB AUDIO SYNTHESIZER (CELESTIAL CHIMES & BLIPS)
-       ========================================================================= */
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -703,7 +650,7 @@
       initAudio();
 
       const now = audioCtx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      const notes = [523.25, 659.25, 783.99, 1046.50];
       
       notes.forEach((freq, index) => {
         const osc = audioCtx.createOscillator();
@@ -761,9 +708,6 @@
       }
     }
 
-    /* =========================================================================
-       4. TEXT-TO-SPEECH (PAIMON VOICE SYNTHESIS)
-       ========================================================================= */
     function toggleTTS() {
       STATE.ttsEnabled = !STATE.ttsEnabled;
       const btn = document.getElementById('ttsToggleBtn');
@@ -784,11 +728,10 @@
       if (!STATE.ttsEnabled || !('speechSynthesis' in window)) return;
 
       window.speechSynthesis.cancel();
-      // Clean markdown symbols for speech
       const cleanText = text.replace(/[*_#`~\[\]]/g, '');
 
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.pitch = 1.7; // High cute pitch for Paimon!
+      utterance.pitch = 1.7;
       utterance.rate = 1.05;
 
       const voices = window.speechSynthesis.getVoices();
@@ -798,9 +741,6 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    /* =========================================================================
-       5. PAIMON AVATAR & EXPRESSION SYSTEM
-       ========================================================================= */
     const PAIMON_QUOTES = {
       idle: [
         "\"Traveler! Paimon is ready to search the Genshin Wiki Archives!\"",
@@ -829,21 +769,16 @@
     function setPaimonExpression(exp) {
       STATE.currentExpression = exp;
 
-      // Hide all face dynamic groups
       const elements = document.querySelectorAll('.expression-element');
       elements.forEach(el => el.classList.add('hidden'));
 
-      // Show expression matching elements
       const targetEye = document.getElementById('eye' + exp.charAt(0).toUpperCase() + exp.slice(1));
       const targetMouth = document.getElementById('mouth' + exp.charAt(0).toUpperCase() + exp.slice(1));
 
       if (targetEye) targetEye.classList.remove('hidden');
       if (targetMouth) targetMouth.classList.remove('hidden');
 
-      // Update status badge
       const badgeText = document.getElementById('statusBadgeText');
-      const badge = document.getElementById('paimonStatusBadge');
-      
       const statusLabels = {
         idle: 'Floating Idle',
         thinking: 'Searching Archives...',
@@ -854,7 +789,6 @@
       
       if (badgeText) badgeText.textContent = statusLabels[exp] || 'Floating';
 
-      // Update banner quote
       const bannerQuote = document.getElementById('paimonBannerQuote');
       const quotes = PAIMON_QUOTES[exp] || PAIMON_QUOTES.idle;
       if (bannerQuote) {
@@ -870,14 +804,10 @@
       setPaimonExpression(pick);
     }
 
-    /* =========================================================================
-       6. GENSHIN WIKI MEDIAWIKI API INTEGRATION
-       ========================================================================= */
     async function fetchGenshinWikiContext(query) {
       try {
         updateProgress("Searching Genshin Wiki Archives...");
         
-        // 1. Search Wiki Page Titles
         const searchUrl = `https://genshin-impact.fandom.com/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
         const searchResp = await fetch(searchUrl);
         if (!searchResp.ok) throw new Error("Wiki Search Failed");
@@ -889,13 +819,11 @@
           return { contextText: "", pages: [] };
         }
 
-        // Take top 3 relevant pages
         const topPages = searchResults.slice(0, 3);
         const pageIds = topPages.map(p => p.pageid).join('|');
 
         updateProgress("Extracting Teyvat Lore Archives...");
 
-        // 2. Fetch Extracts and Full URLs for top pages
         const extractUrl = `https://genshin-impact.fandom.com/api.php?action=query&prop=extracts|info&exintro=1&explaintext=1&inprop=url&pageids=${pageIds}&format=json&origin=*`;
         const extractResp = await fetch(extractUrl);
         if (!extractResp.ok) throw new Error("Wiki Extract Failed");
@@ -927,9 +855,6 @@
       }
     }
 
-    /* =========================================================================
-       7. GROQ API AI GENERATION
-       ========================================================================= */
     async function callGroqApi(userPrompt, wikiContext) {
       if (!STATE.apiKey) {
         openApiKeyModal();
@@ -944,10 +869,17 @@ PAIMON PERSONALITY GUIDELINES:
 - Speak enthusiastically, playfully, and dramatically! Use trademark phrases like "Traveler!", "Ehe te nandayo?!", "Mora", "Sticky Honey Roast", "Listen here!".
 - Express love for delicious food and shiny Mora!
 
+EXPRESSION TAG RULE:
+At the very beginning of your response, include one expression tag that best describes Paimon's mood:
+- [EXPRESSION: happy] (for exciting facts, recipes, food, treasures)
+- [EXPRESSION: thinking] (for complex lore explanations)
+- [EXPRESSION: eating] (when talking about food or eating)
+- [EXPRESSION: shocked] (when confused or when no wiki info was found)
+
 STRICT KNOWLEDGE & WIKI GROUNDING RULES:
 1. You MUST answer the Traveler's question STRICTLY based on the provided Genshin Impact Wiki Context below.
 2. If the Wiki Context contains relevant details, use them to form your response and explicitly mention the article titles referenced (e.g. "According to Paimon's archives on [Article Title]...").
-3. CRITICAL: If the Wiki Context is empty, off-topic, or does NOT contain enough details to answer the query, Paimon MUST explicitly state: "Paimon searched high and low through the Celestial Star Archives, but Paimon couldn't find any information on that in the Genshin Wiki!" Do not invent facts or use non-Wiki lore!
+3. CRITICAL: If the Wiki Context is empty, off-topic, or does NOT contain enough details to answer the query, Paimon MUST explicitly state: "[EXPRESSION: shocked] Paimon searched high and low through the Celestial Star Archives, but Paimon couldn't find any information on that in the Genshin Wiki!" Do not invent facts or use non-Wiki lore!
 
 GENSHIN IMPACT WIKI ARCHIVES CONTEXT:
 ${wikiContext || "NO WIKI MATCHES FOUND."}
@@ -955,11 +887,14 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
 
       const messages = [
         { role: "system", content: systemPrompt },
-        ...STATE.chatHistory.slice(-4), // Last few turns context
+        ...STATE.chatHistory.slice(-4),
         { role: "user", content: userPrompt }
       ];
 
       updateProgress("Paimon is formulating response...");
+
+      // Active default model llama-3.1-8b-instant
+      const activeModel = STATE.model || 'llama-3.1-8b-instant';
 
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -968,7 +903,7 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: STATE.model,
+          model: activeModel,
           messages: messages,
           temperature: 0.6,
           max_tokens: 1024
@@ -984,9 +919,6 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       return data.choices[0]?.message?.content || "Paimon got confused and couldn't answer!";
     }
 
-    /* =========================================================================
-       8. CHAT CONTROLLER & UI RENDERING
-       ========================================================================= */
     const chatMessagesContainer = document.getElementById('chatMessages');
 
     function renderUserMessage(text) {
@@ -1011,10 +943,20 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
     }
 
     function renderPaimonMessage(rawText, wikiPages = []) {
+      // Extract [EXPRESSION: ...] tag if provided
+      let displayResponse = rawText;
+      const tagMatch = rawText.match(/\[EXPRESSION:\s*(idle|happy|thinking|shocked|eating)\]/i);
+
+      if (tagMatch) {
+        const expressionName = tagMatch[1].toLowerCase();
+        setPaimonExpression(expressionName);
+        displayResponse = rawText.replace(/\[EXPRESSION:\s*(idle|happy|thinking|shocked|eating)\]/gi, '').trim();
+      }
+
       const msgDiv = document.createElement('div');
       msgDiv.className = 'flex items-start gap-3.5 max-w-2xl';
 
-      const parsedHtml = marked.parse(rawText);
+      const parsedHtml = marked.parse(displayResponse);
 
       msgDiv.innerHTML = `
         <div class="w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
@@ -1026,7 +968,7 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
               <span class="font-cinzel font-bold text-xs text-amber-300 tracking-wider">PAIMON</span>
               <span class="text-[10px] text-slate-400">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
-            <button onclick="copyToClipboard(\`${escapeForAttribute(rawText)}\`)" class="text-xs text-slate-400 hover:text-amber-300 transition-colors" title="Copy Answer">
+            <button onclick="copyToClipboard(\`${escapeForAttribute(displayResponse)}\`)" class="text-xs text-slate-400 hover:text-amber-300 transition-colors" title="Copy Answer">
               <i class="fa-solid fa-copy"></i>
             </button>
           </div>
@@ -1039,8 +981,7 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       chatMessagesContainer.appendChild(msgDiv);
       scrollToBottom();
 
-      // Trigger Voice TTS
-      speakPaimonText(rawText);
+      speakPaimonText(displayResponse);
     }
 
     function updateWikiSourcesDrawer(pages) {
@@ -1082,35 +1023,21 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       input.value = '';
       renderUserMessage(query);
 
-      // Disable Send Button
       const sendBtn = document.getElementById('sendBtn');
       sendBtn.disabled = true;
 
-      // Set Paimon to Thinking Expression
       setPaimonExpression('thinking');
       showProgress(true);
 
       try {
-        // 1. Fetch Genshin MediaWiki archives
         const { contextText, pages } = await fetchGenshinWikiContext(query);
         STATE.lastWikiPages = pages;
         updateWikiSourcesDrawer(pages);
 
-        // 2. Call Groq API
         const paimonResponse = await callGroqApi(query, contextText);
 
-        // Update Chat History
         STATE.chatHistory.push({ role: "user", content: query });
         STATE.chatHistory.push({ role: "assistant", content: paimonResponse });
-
-        // 3. Render Response & Expression
-        if (paimonResponse.includes("couldn't find any information") || pages.length === 0) {
-          setPaimonExpression('shocked');
-        } else if (paimonResponse.toLowerCase().includes('honey roast') || paimonResponse.toLowerCase().includes('food')) {
-          setPaimonExpression('eating');
-        } else {
-          setPaimonExpression('happy');
-        }
 
         renderPaimonMessage(paimonResponse, pages);
 
@@ -1138,12 +1065,9 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       showToast("Celestial Observatory Chat Cleared!", 'info');
     }
 
-    /* =========================================================================
-       9. MODAL HANDLERS & HELPERS
-       ========================================================================= */
     function openApiKeyModal() {
       document.getElementById('apiKeyInput').value = STATE.apiKey;
-      document.getElementById('modelSelect').value = STATE.model;
+      document.getElementById('modelSelect').value = STATE.model || 'llama-3.1-8b-instant';
       document.getElementById('apiKeyModal').classList.remove('hidden');
     }
 
@@ -1254,15 +1178,18 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       return str.replace(/`/g, "\\`").replace(/"/g, "&quot;");
     }
 
-    /* =========================================================================
-       10. APPLICATION INITIALIZATION
-       ========================================================================= */
     window.onload = function() {
       resizeCanvas();
       renderStarfield();
+      
+      if (!localStorage.getItem('paimon_groq_model')) {
+        STATE.model = 'llama-3.1-8b-instant';
+        localStorage.setItem('paimon_groq_model', 'llama-3.1-8b-instant');
+      }
+      
+      document.getElementById('currentModelDisplay').textContent = STATE.model;
       updateApiKeyBtnText();
 
-      // Check if API key is stored
       if (!STATE.apiKey) {
         setTimeout(() => {
           openApiKeyModal();

@@ -349,8 +349,9 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <span id="currentModelDisplay" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 border border-cyan-500/30">
-            llama-3.1-8b-instant
+          <span id="currentModelDisplay" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5">
+            <i class="fa-solid fa-microchip text-[10px]"></i>
+            <span id="modelLabelText">Detecting Model...</span>
           </span>
           <button onclick="clearChat()" title="Clear Observatory Logs" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-trash-can"></i>
@@ -372,8 +373,8 @@
             </div>
             <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-slate-100 text-sm leading-relaxed shadow-lg">
               <p class="mb-2">Greetings, Traveler! Welcome to <strong>Paimon's Celestial Observatory</strong>! ✨</p>
-              <p>Paimon has updated the observatory telescope to use the <strong>`llama-3.1-8b-instant`</strong> Groq AI engine! Whenever you ask a question, Paimon will scan through the Genshin Impact Wiki Archives, gather real entries, and explain everything to you!</p>
-              <p class="mt-2 text-xs text-amber-300/80 italic">Configure your Groq API Key using the button at the top right to start stargazing!</p>
+              <p>Paimon has upgraded the observatory telescope with <strong>Dynamic Model Auto-Detection</strong>! When you enter your Groq API Key, Paimon will automatically query available active endpoints from Groq and auto-heal if any model becomes decommissioned!</p>
+              <p class="mt-2 text-xs text-amber-300/80 italic">Configure your Groq API Key using the top right button to sync and stargaze!</p>
             </div>
           </div>
         </div>
@@ -443,8 +444,8 @@
           <i class="fa-solid fa-key text-lg"></i>
         </div>
         <div>
-          <h2 class="font-cinzel font-bold text-lg text-amber-200">Groq API Setup</h2>
-          <p class="text-xs text-slate-400">Configure your key to power Paimon's brain!</p>
+          <h2 class="font-cinzel font-bold text-lg text-amber-200">Groq API & Model Setup</h2>
+          <p class="text-xs text-slate-400">Configure your key & auto-detect live models!</p>
         </div>
       </div>
 
@@ -456,6 +457,7 @@
               type="password" 
               id="apiKeyInput" 
               placeholder="gsk_..." 
+              oninput="handleApiKeyInputChange()"
               class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none pr-10"
             />
             <button type="button" onclick="toggleKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300">
@@ -463,17 +465,30 @@
             </button>
           </div>
           <p class="text-[11px] text-slate-400 mt-1">
-            Get a free API key at <a href="https://console.groq.com/" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">console.groq.com</a>. Stored locally in browser storage.
+            Get a free API key at <a href="https://console.groq.com/" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">console.groq.com</a>.
           </p>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-amber-300 mb-1.5">Active Model Endpoint</label>
-          <select id="modelSelect" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none bg-slate-900">
-            <option value="llama-3.1-8b-instant" selected>llama-3.1-8b-instant (Default - Active & Fast)</option>
-            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (High Reasoning)</option>
-            <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (Large Context)</option>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-medium text-amber-300">Active Groq Model</label>
+            <button type="button" onclick="manualDetectModels()" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1">
+              <i id="detectSpinIcon" class="fa-solid fa-rotate"></i>
+              <span>Auto-Detect Models</span>
+            </button>
+          </div>
+          
+          <select id="modelSelect" onchange="handleModelSelectChange()" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none bg-slate-900">
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Recommended)</option>
+            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fast)</option>
+            <option value="llama3-70b-8192">llama3-70b-8192</option>
+            <option value="llama3-8b-8192">llama3-8b-8192</option>
+            <option value="gemma2-9b-it">gemma2-9b-it</option>
+            <option value="qwen-2.5-32b">qwen-2.5-32b</option>
           </select>
+          <p id="modelStatusHint" class="text-[10px] text-emerald-400 mt-1 hidden">
+            <i class="fa-solid fa-circle-check mr-1"></i>Live models queried directly from Groq!
+          </p>
         </div>
 
         <div class="pt-2 flex justify-end gap-2">
@@ -491,9 +506,20 @@
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
+    const FALLBACK_MODELS = [
+      'llama-3.3-70b-versatile',
+      'llama-3.1-8b-instant',
+      'llama3-70b-8192',
+      'llama3-8b-8192',
+      'gemma2-9b-it',
+      'qwen-2.5-32b',
+      'deepseek-r1-distill-llama-70b'
+    ];
+
     const STATE = {
       apiKey: localStorage.getItem('paimon_groq_api_key') || '',
-      model: localStorage.getItem('paimon_groq_model') || 'llama-3.1-8b-instant',
+      model: localStorage.getItem('paimon_groq_model') || 'llama-3.3-70b-versatile',
+      availableModels: [],
       soundEnabled: true,
       ttsEnabled: false,
       currentExpression: 'idle',
@@ -855,6 +881,103 @@
       }
     }
 
+    async function fetchActiveGroqModels(keyToUse = STATE.apiKey, showToasts = false) {
+      if (!keyToUse) return;
+      
+      const spinIcon = document.getElementById('detectSpinIcon');
+      if (spinIcon) spinIcon.classList.add('fa-spin');
+
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/models", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${keyToUse}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error(`Groq Models API error (${res.status})`);
+        }
+
+        const data = await res.json();
+        const modelList = data.data || [];
+
+        // Filter out whisper/vision/audio/embedding/guard models, keeping text LLMs
+        const activeTextModels = modelList
+          .filter(m => m.active !== false && 
+                       !m.id.includes('whisper') && 
+                       !m.id.includes('vision') && 
+                       !m.id.includes('guard'))
+          .map(m => m.id)
+          .sort();
+
+        if (activeTextModels.length > 0) {
+          STATE.availableModels = activeTextModels;
+          populateModelSelectOptions(activeTextModels);
+
+          // Auto-healing logic: Check if stored model exists in current active list
+          if (!activeTextModels.includes(STATE.model)) {
+            const healedModel = activeTextModels.find(m => m.includes('llama-3.3-70b')) || 
+                                activeTextModels.find(m => m.includes('llama-3.1')) || 
+                                activeTextModels[0];
+            
+            STATE.model = healedModel;
+            localStorage.setItem('paimon_groq_model', healedModel);
+            if (showToasts) showToast(`Auto-healed model endpoint to: ${healedModel}`, 'info');
+          }
+
+          document.getElementById('modelLabelText').textContent = STATE.model;
+          document.getElementById('modelStatusHint').classList.remove('hidden');
+
+          if (showToasts) showToast(`Successfully detected ${activeTextModels.length} active Groq models!`, 'success');
+        }
+
+      } catch (err) {
+        console.warn("Auto-detection of Groq models failed, using standard list:", err);
+        populateModelSelectOptions(FALLBACK_MODELS);
+        if (showToasts) showToast("Could not query Groq models endpoint. Loaded default fallback models.", 'error');
+      } finally {
+        if (spinIcon) spinIcon.classList.remove('fa-spin');
+      }
+    }
+
+    function populateModelSelectOptions(models) {
+      const select = document.getElementById('modelSelect');
+      if (!select) return;
+
+      select.innerHTML = '';
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m + (m === STATE.model ? ' (Active)' : '');
+        if (m === STATE.model) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function manualDetectModels() {
+      const key = document.getElementById('apiKeyInput').value.trim() || STATE.apiKey;
+      if (!key) {
+        showToast("Please enter a Groq API Key first!", 'error');
+        return;
+      }
+      fetchActiveGroqModels(key, true);
+    }
+
+    function handleApiKeyInputChange() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key.startsWith('gsk_') && key.length > 20) {
+        fetchActiveGroqModels(key, false);
+      }
+    }
+
+    function handleModelSelectChange() {
+      const select = document.getElementById('modelSelect');
+      STATE.model = select.value;
+      document.getElementById('modelLabelText').textContent = STATE.model;
+    }
+
     async function callGroqApi(userPrompt, wikiContext) {
       if (!STATE.apiKey) {
         openApiKeyModal();
@@ -893,10 +1016,9 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
 
       updateProgress("Paimon is formulating response...");
 
-      // Active default model llama-3.1-8b-instant
-      const activeModel = STATE.model || 'llama-3.1-8b-instant';
+      const activeModel = STATE.model || 'llama-3.3-70b-versatile';
 
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      let response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${STATE.apiKey}`,
@@ -910,9 +1032,42 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
         })
       });
 
+      // If model failed or decommissioned, attempt dynamic auto-healing query
       if (!response.ok) {
         const errJson = await response.json().catch(() => ({}));
-        throw new Error(errJson.error?.message || `Groq API Error (${response.status})`);
+        const errMsg = errJson.error?.message || `Groq API Error (${response.status})`;
+
+        if (errMsg.includes('decommissioned') || errMsg.includes('does not exist') || errMsg.includes('access')) {
+          showToast("Model unavailable! Attempting auto-healing...", 'info');
+          await fetchActiveGroqModels(STATE.apiKey, false);
+
+          if (STATE.availableModels.length > 0 && STATE.availableModels[0] !== activeModel) {
+            const fallbackModel = STATE.availableModels[0];
+            STATE.model = fallbackModel;
+            localStorage.setItem('paimon_groq_model', fallbackModel);
+            document.getElementById('modelLabelText').textContent = fallbackModel;
+
+            // Retry with healed model
+            response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${STATE.apiKey}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                model: fallbackModel,
+                messages: messages,
+                temperature: 0.6,
+                max_tokens: 1024
+              })
+            });
+          }
+        }
+
+        if (!response.ok) {
+          const retryErr = await response.json().catch(() => ({}));
+          throw new Error(retryErr.error?.message || errMsg);
+        }
       }
 
       const data = await response.json();
@@ -943,7 +1098,6 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
     }
 
     function renderPaimonMessage(rawText, wikiPages = []) {
-      // Extract [EXPRESSION: ...] tag if provided
       let displayResponse = rawText;
       const tagMatch = rawText.match(/\[EXPRESSION:\s*(idle|happy|thinking|shocked|eating)\]/i);
 
@@ -1067,8 +1221,11 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
 
     function openApiKeyModal() {
       document.getElementById('apiKeyInput').value = STATE.apiKey;
-      document.getElementById('modelSelect').value = STATE.model || 'llama-3.1-8b-instant';
       document.getElementById('apiKeyModal').classList.remove('hidden');
+      
+      if (STATE.apiKey) {
+        fetchActiveGroqModels(STATE.apiKey, false);
+      }
     }
 
     function closeApiKeyModal() {
@@ -1097,11 +1254,11 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       localStorage.setItem('paimon_groq_api_key', key);
       localStorage.setItem('paimon_groq_model', model);
 
-      document.getElementById('currentModelDisplay').textContent = model;
+      document.getElementById('modelLabelText').textContent = model;
       updateApiKeyBtnText();
 
       closeApiKeyModal();
-      showToast("Groq API Key & Model Saved Successfully!", 'success');
+      showToast("Groq API Key & Active Model Saved!", 'success');
       playCelestialChime();
     }
 
@@ -1167,7 +1324,7 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
-      }, 3500);
+      }, 3800);
     }
 
     function escapeHtml(str) {
@@ -1181,16 +1338,14 @@ ${wikiContext || "NO WIKI MATCHES FOUND."}
     window.onload = function() {
       resizeCanvas();
       renderStarfield();
-      
-      if (!localStorage.getItem('paimon_groq_model')) {
-        STATE.model = 'llama-3.1-8b-instant';
-        localStorage.setItem('paimon_groq_model', 'llama-3.1-8b-instant');
-      }
-      
-      document.getElementById('currentModelDisplay').textContent = STATE.model;
+
+      document.getElementById('modelLabelText').textContent = STATE.model;
       updateApiKeyBtnText();
 
-      if (!STATE.apiKey) {
+      if (STATE.apiKey) {
+        fetchActiveGroqModels(STATE.apiKey, false);
+      } else {
+        populateModelSelectOptions(FALLBACK_MODELS);
         setTimeout(() => {
           openApiKeyModal();
         }, 800);

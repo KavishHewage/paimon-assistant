@@ -1,468 +1,1274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paimon's Celestial Observatory</title>
-    <style>
-        :root {
-            --bg-color: #0b1021;
-            --panel-bg: rgba(20, 25, 45, 0.85);
-            --border-gold: #d4af37;
-            --text-main: #e8e9eb;
-            --text-muted: #8e95a5;
-            --accent-blue: #4a90e2;
-            --paimon-highlight: #ffb7c5;
-            --error-red: #ff5555;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paimon's Celestial Observatory</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        #bg-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background: linear-gradient(to bottom, rgba(11, 16, 33, 0.95), transparent);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-            z-index: 10;
-        }
-
-        h1 {
-            font-size: 1.4rem;
-            color: var(--border-gold);
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 12px;
-        }
-
-        button {
-            background: rgba(30, 40, 70, 0.7);
-            border: 1px solid var(--border-gold);
-            color: var(--text-main);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        button:hover {
-            background: rgba(212, 175, 55, 0.25);
-            box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-        }
-
-        #chat-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 10;
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border-gold) transparent;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 14px 18px;
-            border-radius: 12px;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease-in;
-            position: relative;
-            word-wrap: break-word;
-        }
-
-        .message.user {
-            align-self: flex-end;
-            background: rgba(74, 144, 226, 0.25);
-            border: 1px solid rgba(74, 144, 226, 0.6);
-            border-bottom-right-radius: 2px;
-        }
-
-        .message.paimon {
-            align-self: flex-start;
-            background: rgba(255, 183, 197, 0.12);
-            border: 1px solid rgba(255, 183, 197, 0.4);
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 0 15px rgba(255, 183, 197, 0.05);
-        }
-
-        .message.system-error {
-            align-self: center;
-            background: rgba(255, 85, 85, 0.15);
-            border: 1px solid var(--error-red);
-            color: #ff9999;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .wiki-context {
-            font-size: 0.8rem;
-            color: var(--border-gold);
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed rgba(212, 175, 55, 0.3);
-            font-style: italic;
-        }
-
-        #input-area {
-            padding: 15px 20px 20px 20px;
-            background: var(--panel-bg);
-            border-top: 1px solid rgba(212, 175, 55, 0.3);
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            backdrop-filter: blur(8px);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        textarea {
-            flex-grow: 1;
-            background: rgba(10, 15, 30, 0.85);
-            border: 1px solid var(--border-gold);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            resize: none;
-            height: 52px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-
-        textarea:focus {
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
-            border-color: #f3e5ab;
-        }
-
-        .presets {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            max-width: 900px;
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .presets button {
-            background: rgba(15, 20, 35, 0.6);
-            border: 1px dashed var(--text-muted);
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            white-space: nowrap;
-            padding: 5px 12px;
-        }
-
-        .presets button:hover {
-            color: var(--border-gold);
-            border-color: var(--border-gold);
-        }
-
-        /* Modal Styles */
-        #settings-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
-            background: var(--bg-color);
-            border: 2px solid var(--border-gold);
-            padding: 30px;
-            border-radius: 12px;
-            width: 420px;
-            max-width: 90%;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
-        }
-
-        .modal-content h2 { color: var(--border-gold); margin-bottom: 8px; font-size: 1.25rem; }
-        .modal-content p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4; }
-        .modal-content label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--border-gold); }
-        .modal-content input, .modal-content select {
-            width: 100%; padding: 10px 12px; margin-bottom: 18px;
-            background: rgba(255,255,255,0.08); border: 1px solid var(--border-gold);
-            color: white; border-radius: 6px; outline: none; font-size: 0.9rem;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 8px;
-        }
-        .status-badge.set { background: rgba(85, 255, 127, 0.2); color: #55ff7f; border: 1px solid #55ff7f; }
-        .status-badge.missing { background: rgba(255, 85, 85, 0.2); color: #ff5555; border: 1px solid #ff5555; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .typing-indicator {
-            display: none;
-            align-self: flex-start;
-            padding: 10px 18px;
-            color: var(--paimon-highlight);
-            font-style: italic;
-            font-size: 0.9rem;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-    </style>
-</head>
-<body>
-
-    <canvas id="bg-canvas"></canvas>
-
-    <header>
-        <h1>✨ Paimon's Celestial Observatory</h1>
-        <div class="header-controls">
-            <button id="fact-mode-btn" onclick="toggleFactMode()">Mode: Standard</button>
-            <button id="audio-btn" onclick="toggleAudio()">Audio: ON</button>
-            <button onclick="openSettings()">⚙️ Settings <span id="key-badge" class="status-badge missing">No Key</span></button>
-        </div>
-    </header>
-
-    <!-- CRITICAL FIX: The typing indicator is now properly INSIDE the chat container -->
-    <div id="chat-container">
-        <div class="message paimon" id="welcome-msg">
-            Ehe! Paimon is here! Before we explore Teyvat, make sure to add your Groq API Key using the <b>⚙️ Settings</b> button in the top right corner!
-        </div>
-        
-        <div class="typing-indicator" id="typing-indicator">✨ Paimon is thinking...</div>
-    </div>
-
-    <div id="input-area">
-        <div class="presets">
-            <button onclick="usePreset('Tell me about the Anemo Archon')">Anemo Archon</button>
-            <button onclick="usePreset('What materials do I need to ascend Ayaka?')">Ayaka Materials</button>
-            <button onclick="usePreset('Explain the history of Khaenri\'ah')">Khaenri'ah Lore</button>
-            <button onclick="usePreset('What is Paimon\'s favorite food?')">Paimon's Food</button>
-        </div>
-        <div class="input-wrapper">
-            <textarea id="user-input" placeholder="Ask Paimon anything about Genshin Impact..." onkeypress="handleEnter(event)"></textarea>
-            <button onclick="sendMessage()" style="padding: 0 25px; font-weight: bold; background: rgba(212, 175, 55, 0.25);">Send</button>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal">
-        <div class="modal-content">
-            <h2>⚙️ Groq API Settings</h2>
-            <p>Get a free Groq API key from <a href="https://console.groq.com" target="_blank" style="color: var(--accent-blue);">console.groq.com</a>. Your key is stored locally in your browser and never shared.</p>
-            
-            <label>Groq API Key</label>
-            <input type="password" id="api-key-input" placeholder="gsk_...">
-            
-            <label>Select Model</label>
-            <select id="model-select">
-                <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Recommended)</option>
-                <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Faster)</option>
-                <option value="gemma2-9b-it">Gemma 2 9B IT</option>
-            </select>
-            
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="closeSettings()" style="background: transparent; border-color: var(--text-muted);">Cancel</button>
-                <button onclick="saveSettings()" style="background: rgba(212, 175, 55, 0.3);">Save Settings</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- STATE & CONFIG ---
-        let groqApiKey = localStorage.getItem('groqApiKey') || "";
-        let currentModel = localStorage.getItem('groqModel') || "llama-3.3-70b-versatile";
-        let isStrictFactMode = false;
-        let isAudioEnabled = true;
-        let chatHistory = [];
-
-        // Update UI status badge on launch
-        window.addEventListener('DOMContentLoaded', () => {
-            updateBadge();
-            if (!groqApiKey) {
-                openSettings();
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            genshin: {
+              gold: '#f3cb63',
+              darkGold: '#c29738',
+              cyan: '#56e2f1',
+              blue: '#1c213d',
+              deepBg: '#090b16',
+              purple: '#9d5bf0',
+              glass: 'rgba(18, 22, 46, 0.75)'
             }
+          },
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #090b16;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+
+    /* Custom Glassmorphism */
+    .glass-panel {
+      background: rgba(15, 20, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(243, 203, 99, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    }
+
+    .glass-input {
+      background: rgba(9, 11, 22, 0.8);
+      border: 1px solid rgba(243, 203, 99, 0.3);
+    }
+    .glass-input:focus {
+      border-color: #56e2f1;
+      box-shadow: 0 0 12px rgba(86, 226, 241, 0.4);
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(9, 11, 22, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(243, 203, 99, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(243, 203, 99, 0.8);
+    }
+
+    /* Floating Keyframe for Paimon Avatar */
+    @keyframes paimonFloat {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-10px) rotate(1.5deg);
+      }
+    }
+
+    .paimon-float {
+      animation: paimonFloat 3.8s ease-in-out infinite;
+    }
+
+    /* Celestial Glowing Text */
+    .text-glow-gold {
+      text-shadow: 0 0 10px rgba(243, 203, 99, 0.6), 0 0 20px rgba(243, 203, 99, 0.2);
+    }
+    .text-glow-cyan {
+      text-shadow: 0 0 10px rgba(86, 226, 241, 0.6), 0 0 20px rgba(86, 226, 241, 0.2);
+    }
+
+    /* Markdown Styling in Messages */
+    .prose strong { color: #f3cb63; }
+    .prose a { color: #56e2f1; text-decoration: underline; }
+    .prose code { background: rgba(243, 203, 99, 0.15); color: #f3cb63; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    .prose p { margin-bottom: 0.5rem; line-height: 1.6; }
+
+    /* Keyframe Pulse for Crown Glow */
+    @keyframes haloPulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    .halo-glow {
+      animation: haloPulse 3s infinite ease-in-out;
+      transform-origin: center;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative text-slate-100">
+
+  <!-- Animated Starfield Canvas -->
+  <canvas id="starfieldCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Top Navigation / Header -->
+  <header class="relative z-10 glass-panel border-b border-amber-500/20 px-4 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 via-amber-200 to-cyan-400 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center">
+        <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
+          <i class="fa-solid font-cinzel fa-compass text-amber-300 text-lg"></i>
+        </div>
+      </div>
+      <div>
+        <h1 class="font-cinzel text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-cyan-300 text-glow-gold">
+          Paimon's Celestial Observatory
+        </h1>
+        <p class="text-xs text-amber-200/70 tracking-wider">GENSHIN IMPACT WIKI ARCHIVES & COMPANION</p>
+      </div>
+    </div>
+
+    <!-- Header Action Controls -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Web Audio Sound Toggle -->
+      <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-amber-300 text-xs sm:text-sm flex items-center gap-2 transition-all">
+        <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+        <span class="hidden sm:inline">Audio</span>
+      </button>
+
+      <!-- Speech Synthesis TTS Toggle -->
+      <button id="ttsToggleBtn" onclick="toggleTTS()" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-slate-400 text-xs sm:text-sm flex items-center gap-2 transition-all">
+        <i id="ttsIcon" class="fa-solid fa-comment-dots"></i>
+        <span class="hidden sm:inline">Paimon Voice</span>
+      </button>
+
+      <!-- API Key Modal Trigger -->
+      <button onclick="openApiKeyModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold text-xs sm:text-sm shadow-md shadow-amber-500/20 flex items-center gap-2 transition-all">
+        <i class="fa-solid fa-key"></i>
+        <span id="apiKeyBtnText">Configure Groq API</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- Left Column: Paimon Interactive Character & Quick Controls -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      
+      <!-- Paimon Card & Dynamic SVG Avatar -->
+      <div class="glass-panel rounded-2xl p-5 border border-amber-500/30 flex flex-col items-center text-center relative overflow-hidden">
+        
+        <!-- Celestial Star Deco behind avatar -->
+        <div class="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Expression Status Badge -->
+        <div class="self-end mb-2">
+          <span id="paimonStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-950/80 border border-cyan-400/30 text-cyan-300">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span id="statusBadgeText">Floating Idle</span>
+          </span>
+        </div>
+
+        <!-- SVG Avatar Wrapper -->
+        <div class="relative w-48 h-48 sm:w-56 sm:h-56 paimon-float my-2 flex items-center justify-center">
+          
+          <!-- Animated SVG Avatar -->
+          <svg id="paimonSvg" viewBox="0 0 300 300" class="w-full h-full drop-shadow-[0_10px_20px_rgba(243,203,99,0.25)]">
+            <!-- SVG Definitions -->
+            <defs>
+              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffe8a3"/>
+                <stop offset="100%" stop-color="#f3cb63"/>
+              </linearGradient>
+              <linearGradient id="capeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#0f1638"/>
+                <stop offset="100%" stop-color="#1c2759"/>
+              </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Celestial Crown Halo -->
+            <g class="halo-glow">
+              <ellipse cx="150" cy="52" rx="55" ry="14" fill="none" stroke="url(#goldGrad)" stroke-width="4" filter="url(#glow)"/>
+              <polygon points="150,30 154,42 166,42 156,50 160,62 150,54 140,62 144,50 134,42 146,42" fill="#ffe8a3"/>
+            </g>
+
+            <!-- Starry Scarf / Cape -->
+            <path d="M 80 190 Q 150 215 220 190 Q 235 260 150 280 Q 65 260 80 190 Z" fill="url(#capeGrad)" stroke="#f3cb63" stroke-width="2"/>
+            <!-- Cape Stars -->
+            <circle cx="110" cy="230" r="2.5" fill="#56e2f1" />
+            <circle cx="190" cy="235" r="2" fill="#ffe8a3" />
+            <circle cx="150" cy="250" r="3" fill="#ffffff" />
+            <polygon points="130,225 132,229 136,229 133,231 134,235 130,233 126,235 127,231 124,229 128,229" fill="#f3cb63"/>
+
+            <!-- Hair Back -->
+            <path d="M 75 120 C 60 170 85 200 110 205 C 150 210 190 210 230 205 C 255 200 280 170 265 120 C 250 80 200 75 150 75 C 100 75 90 80 75 120 Z" fill="#e2e8f0"/>
+
+            <!-- Head / Face -->
+            <ellipse cx="150" cy="140" rx="60" ry="52" fill="#fff1e6"/>
+
+            <!-- Front Hair & Bangs -->
+            <path d="M 90 120 Q 120 125 150 100 Q 180 125 210 120 Q 225 140 215 160 C 200 120 180 110 150 112 C 120 110 100 120 85 160 Q 75 140 90 120 Z" fill="#f8fafc"/>
+            <path d="M 135 110 Q 150 130 165 110 Q 150 105 135 110 Z" fill="#e2e8f0"/>
+
+            <!-- Crown Clip -->
+            <path d="M 100 102 L 115 90 L 125 105 Z" fill="#1c213d" stroke="#f3cb63" stroke-width="2"/>
+
+            <!-- EXPRESSION Dynamic Elements Group -->
+            <g id="paimonFaceGroup">
+              <!-- IDLE EYES (Default) -->
+              <g id="eyeIdle" class="expression-element">
+                <!-- Left Eye -->
+                <ellipse cx="120" cy="142" rx="9" ry="14" fill="#1e1b4b"/>
+                <ellipse cx="120" cy="142" rx="7" ry="11" fill="#4338ca"/>
+                <circle cx="118" cy="137" r="3.5" fill="#ffffff"/>
+                <circle cx="122" cy="147" r="1.5" fill="#56e2f1"/>
+                <!-- Right Eye -->
+                <ellipse cx="180" cy="142" rx="9" ry="14" fill="#1e1b4b"/>
+                <ellipse cx="180" cy="142" rx="7" ry="11" fill="#4338ca"/>
+                <circle cx="178" cy="137" r="3.5" fill="#ffffff"/>
+                <circle cx="182" cy="147" r="1.5" fill="#56e2f1"/>
+              </g>
+
+              <!-- THINKING / SEARCHING EYES -->
+              <g id="eyeThinking" class="expression-element hidden">
+                <ellipse cx="122" cy="138" rx="8" ry="12" fill="#1e1b4b"/>
+                <circle cx="120" cy="134" r="3" fill="#ffffff"/>
+                <ellipse cx="182" cy="138" rx="8" ry="12" fill="#1e1b4b"/>
+                <circle cx="180" cy="134" r="3" fill="#ffffff"/>
+                <!-- Floating Question Sparkles -->
+                <text x="205" y="115" fill="#f3cb63" font-size="22" font-weight="bold" font-family="sans-serif">?</text>
+              </g>
+
+              <!-- HAPPY / EXCITED EYES -->
+              <g id="eyeHappy" class="expression-element hidden">
+                <path d="M 110 145 Q 120 132 130 145" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
+                <path d="M 170 145 Q 180 132 190 145" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
+                <polygon points="75,100 80,110 90,110 82,116 85,126 75,120 65,126 68,116 60,110 70,110" fill="#f3cb63" opacity="0.8"/>
+                <polygon points="225,100 230,110 240,110 232,116 235,126 225,120 215,126 218,116 210,110 220,110" fill="#f3cb63" opacity="0.8"/>
+              </g>
+
+              <!-- SHOCKED EYES -->
+              <g id="eyeShocked" class="expression-element hidden">
+                <circle cx="120" cy="142" r="12" fill="#ffffff" stroke="#1e1b4b" stroke-width="3"/>
+                <circle cx="120" cy="142" r="3" fill="#1e1b4b"/>
+                <circle cx="180" cy="142" r="12" fill="#ffffff" stroke="#1e1b4b" stroke-width="3"/>
+                <circle cx="180" cy="142" r="3" fill="#1e1b4b"/>
+                <!-- Sweat Drop -->
+                <path d="M 205 125 C 205 120 212 110 212 110 C 212 110 219 120 219 125 C 219 129 216 132 212 132 C 208 132 205 129 205 125 Z" fill="#56e2f1"/>
+              </g>
+
+              <!-- EATING EYES -->
+              <g id="eyeEating" class="expression-element hidden">
+                <path d="M 110 140 Q 120 148 130 140" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 170 140 Q 180 148 190 140" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round"/>
+              </g>
+
+              <!-- CHEEK BLUSH (Shared) -->
+              <ellipse cx="105" cy="155" rx="8" ry="4" fill="#f43f5e" opacity="0.4"/>
+              <ellipse cx="195" cy="155" rx="8" ry="4" fill="#f43f5e" opacity="0.4"/>
+
+              <!-- MOUTHS -->
+              <!-- Idle Mouth -->
+              <path id="mouthIdle" class="expression-element" d="M 142 162 Q 150 168 158 162" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
+              
+              <!-- Thinking Mouth -->
+              <ellipse id="mouthThinking" class="expression-element hidden" cx="150" cy="165" rx="4" ry="5" fill="#9f1239"/>
+
+              <!-- Happy Mouth -->
+              <path id="mouthHappy" class="expression-element hidden" d="M 140 160 Q 150 176 160 160 Z" fill="#9f1239"/>
+
+              <!-- Shocked Mouth -->
+              <ellipse id="mouthShocked" class="expression-element hidden" cx="150" cy="166" rx="8" ry="10" fill="#9f1239"/>
+
+              <!-- Eating Mouth & Sticky Honey Roast Item -->
+              <g id="mouthEating" class="expression-element hidden">
+                <path d="M 142 163 Q 150 156 158 163" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
+                <!-- Meat Prop -->
+                <g transform="translate(135, 168) rotate(-10) scale(0.7)">
+                  <path d="M 10 10 L 35 5 C 45 15 40 30 25 30 L 10 20 Z" fill="#b45309" stroke="#78350f" stroke-width="2"/>
+                  <rect x="0" y="15" width="12" height="6" rx="3" fill="#f8fafc" stroke="#cbd5e1"/>
+                  <circle cx="28" cy="18" r="3" fill="#f3cb63"/>
+                </g>
+              </g>
+
+            </g>
+          </svg>
+        </div>
+
+        <!-- Paimon Persona Quote Bubble -->
+        <div class="mt-2 w-full bg-slate-900/90 border border-amber-500/20 rounded-xl p-3 text-xs sm:text-sm text-amber-100/90 italic leading-relaxed">
+          <i class="fa-solid fa-quote-left text-amber-400/50 mr-1.5"></i>
+          <span id="paimonBannerQuote">"Traveler! Paimon is ready to search the Genshin Wiki Archives! Ask Paimon anything about Teyvat!"</span>
+          <i class="fa-solid fa-quote-right text-amber-400/50 ml-1.5"></i>
+        </div>
+
+        <!-- Expression Tester Buttons (Interactive Fun) -->
+        <div class="mt-4 flex flex-wrap justify-center gap-1.5 w-full">
+          <button onclick="setPaimonExpression('idle')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Floating</button>
+          <button onclick="setPaimonExpression('happy')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Excited</button>
+          <button onclick="setPaimonExpression('thinking')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Thinking</button>
+          <button onclick="setPaimonExpression('shocked')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Shocked!</button>
+          <button onclick="setPaimonExpression('eating')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Honey Roast</button>
+        </div>
+      </div>
+
+      <!-- Quick Celestial Starter Prompts -->
+      <div class="glass-panel rounded-2xl p-4 border border-amber-500/30 flex flex-col gap-2.5">
+        <h3 class="font-cinzel text-xs font-bold text-amber-300 tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
+          CELESTIAL INQUIRIES
+        </h3>
+        <div class="flex flex-col gap-1.5 text-xs">
+          <button onclick="sendQuickPrompt('Tell me about the Raiden Shogun lore and background')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
+            <span>⚡ Raiden Shogun Lore</span>
+            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </button>
+          <button onclick="sendQuickPrompt('What is Sticky Honey Roast and how do you make it?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
+            <span>🍖 Sticky Honey Roast Recipe</span>
+            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </button>
+          <button onclick="sendQuickPrompt('Who are the Eleven Fatui Harbingers and who is Number 1?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
+            <span>🎭 Eleven Fatui Harbingers</span>
+            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </button>
+          <button onclick="sendQuickPrompt('How do Primogems and Wishing system work in Genshin Impact?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
+            <span>✨ Primogems & Wish System</span>
+            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </button>
+          <button onclick="sendQuickPrompt('What happened in the Fontaine Archon Quest story?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
+            <span>🌊 Fontaine Archon Quest Summary</span>
+            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Interactive Chat Interface & Wiki Context Viewer -->
+    <section class="lg:col-span-8 flex flex-col h-[700px] glass-panel rounded-2xl border border-amber-500/30 overflow-hidden shadow-2xl">
+      
+      <!-- Chat Header -->
+      <div class="px-5 py-3.5 bg-slate-950/80 border-b border-amber-500/20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-3 h-3 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse"></div>
+          <span class="font-cinzel text-sm font-semibold text-amber-200">Genshin Wiki Sync Active</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Model badge -->
+          <span id="currentModelDisplay" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 border border-cyan-500/30">
+            llama-3.3-70b-versatile
+          </span>
+          <button onclick="clearChat()" title="Clear Observatory Logs" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Display Area -->
+      <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-5">
+        
+        <!-- Welcome Paimon Message -->
+        <div class="flex items-start gap-3.5 max-w-2xl">
+          <div class="w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
+            <i class="fa-solid fa-crown text-sm"></i>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center gap-2">
+              <span class="font-cinzel font-bold text-xs text-amber-300 tracking-wider">PAIMON</span>
+              <span class="text-[10px] text-slate-400">Observatory System</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-slate-100 text-sm leading-relaxed shadow-lg">
+              <p class="mb-2">Greetings, Traveler! Welcome to <strong>Paimon's Celestial Observatory</strong>! ✨</p>
+              <p>Paimon has hooked up this telescope directly to the <strong>Genshin Impact Wiki Archives</strong>! Whenever you ask a question, Paimon will fly through the star archives, gather real wiki entries, and explain everything to you!</p>
+              <p class="mt-2 text-xs text-amber-300/80 italic">Make sure to configure your Groq API Key using the button at the top right to start stargazing!</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Search/Generation Progress Bar -->
+      <div id="progressIndicator" class="hidden px-5 py-2 bg-slate-900/90 border-t border-amber-500/20 flex items-center gap-3 text-xs text-cyan-300">
+        <i class="fa-solid fa-spinner fa-spin text-amber-400"></i>
+        <span id="progressText">Gazing into Celestial Stars...</span>
+      </div>
+
+      <!-- Sourced Wiki Drawer (Collapsible) -->
+      <div id="wikiSourcesDrawer" class="hidden border-t border-amber-500/20 bg-slate-950/90 p-3 max-h-36 overflow-y-auto">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-cinzel text-amber-300 font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-book-bookmark text-cyan-400"></i>
+            CONSULTED WIKI ARCHIVES
+          </span>
+          <button onclick="toggleWikiDrawer()" class="text-xs text-slate-400 hover:text-slate-200">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="wikiSourcesContainer" class="flex flex-wrap gap-2">
+          <!-- Dynamic Wiki Pill Links will be injected here -->
+        </div>
+      </div>
+
+      <!-- Input Form -->
+      <div class="p-3 sm:p-4 bg-slate-950/90 border-t border-amber-500/20">
+        <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex gap-2 items-center">
+          <div class="relative flex-1">
+            <input 
+              type="text" 
+              id="userInput" 
+              placeholder="Ask Paimon about Teyvat lore, characters, items, quests..." 
+              class="w-full px-4 py-3 rounded-xl glass-input text-slate-100 placeholder-slate-400 text-sm focus:outline-none transition-all pr-10"
+              autocomplete="off"
+            />
+            <button type="button" onclick="triggerRandomPaimonPhrase()" class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-200 transition-colors" title="Poke Paimon!">
+              <i class="fa-solid fa-wand-sparkles text-sm"></i>
+            </button>
+          </div>
+
+          <button 
+            type="submit" 
+            id="sendBtn"
+            class="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+          >
+            <span>Ask</span>
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+          </button>
+        </form>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Groq API Key & Settings Modal -->
+  <div id="apiKeyModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-amber-500/40 shadow-2xl relative">
+      <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-amber-300">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center text-amber-300">
+          <i class="fa-solid fa-key text-lg"></i>
+        </div>
+        <div>
+          <h2 class="font-cinzel font-bold text-lg text-amber-200">Groq API Setup</h2>
+          <p class="text-xs text-slate-400">Configure your key to power Paimon's brain!</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-amber-300 mb-1.5">Groq API Key (`gsk_...`)</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="apiKeyInput" 
+              placeholder="gsk_..." 
+              class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none pr-10"
+            />
+            <button type="button" onclick="toggleKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300">
+              <i id="keyVisibilityIcon" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">
+            Get a free API key at <a href="https://console.groq.com/" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">console.groq.com</a>. Stored safely in local browser storage.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-amber-300 mb-1.5">Select AI Model</label>
+          <select id="modelSelect" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none bg-slate-900">
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Recommended - High Accuracy)</option>
+            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Super Fast)</option>
+            <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (High Context)</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">
+            Cancel
+          </button>
+          <button onclick="saveApiKeySettings()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs shadow-md">
+            Save & Connect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Popup Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    /* =========================================================================
+       1. GLOBAL STATE & SYSTEM CONFIGURATION
+       ========================================================================= */
+    const STATE = {
+      apiKey: localStorage.getItem('paimon_groq_api_key') || '',
+      model: localStorage.getItem('paimon_groq_model') || 'llama-3.3-70b-versatile',
+      soundEnabled: true,
+      ttsEnabled: false,
+      currentExpression: 'idle',
+      lastWikiPages: [],
+      chatHistory: []
+    };
+
+    /* =========================================================================
+       2. CANVAS STARFIELD & PARALLAX ENGINE
+       ========================================================================= */
+    const canvas = document.getElementById('starfieldCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let stars = [];
+    let shootingStars = [];
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetMouseX = 0;
+    let targetMouseY = 0;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 3000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          z: Math.random() * canvas.width,
+          size: Math.random() * 1.5 + 0.5,
+          color: Math.random() > 0.3 ? '#ffffff' : (Math.random() > 0.5 ? '#f3cb63' : '#56e2f1'),
+          alpha: Math.random(),
+          twinkleSpeed: (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1)
+        });
+      }
+    }
+
+    function createShootingStar() {
+      if (Math.random() < 0.02 && shootingStars.length < 3) {
+        shootingStars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * (canvas.height / 2),
+          length: Math.random() * 80 + 40,
+          speed: Math.random() * 10 + 6,
+          angle: Math.PI / 4 + (Math.random() * 0.2 - 0.1),
+          alpha: 1
+        });
+      }
+    }
+
+    function renderStarfield() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Smooth mouse interpolation for parallax
+      mouseX += (targetMouseX - mouseX) * 0.05;
+      mouseY += (targetMouseY - mouseY) * 0.05;
+
+      // Draw background Nebula radial gradient glow
+      const nebulaGrad = ctx.createRadialGradient(
+        canvas.width * 0.3 + mouseX * 0.05, 
+        canvas.height * 0.3 + mouseY * 0.05, 
+        50, 
+        canvas.width * 0.5, 
+        canvas.height * 0.5, 
+        canvas.width * 0.8
+      );
+      nebulaGrad.addColorStop(0, 'rgba(30, 27, 75, 0.35)');
+      nebulaGrad.addColorStop(0.5, 'rgba(15, 23, 42, 0.2)');
+      nebulaGrad.addColorStop(1, 'rgba(9, 11, 22, 0)');
+      ctx.fillStyle = nebulaGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Stars and Constellations
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
+
+        // Twinkle update
+        s.alpha += s.twinkleSpeed;
+        if (s.alpha > 1 || s.alpha < 0.2) s.twinkleSpeed = -s.twinkleSpeed;
+
+        // Parallax shift
+        const px = s.x + (mouseX - canvas.width / 2) * (s.size * 0.02);
+        const py = s.y + (mouseY - canvas.height / 2) * (s.size * 0.02);
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, s.alpha));
+        ctx.fillStyle = s.color;
+        ctx.beginPath();
+        ctx.arc(px, py, s.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Constellation Lines to nearby stars
+        if (i % 8 === 0) {
+          for (let j = i + 1; j < i + 4 && j < stars.length; j++) {
+            const s2 = stars[j];
+            const dist = Math.hypot(s.x - s2.x, s.y - s2.y);
+            if (dist < 90) {
+              ctx.strokeStyle = 'rgba(243, 203, 99, ' + (0.15 - dist / 600) + ')';
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(px, py);
+              ctx.lineTo(s2.x + (mouseX - canvas.width / 2) * (s2.size * 0.02), s2.y + (mouseY - canvas.height / 2) * (s2.size * 0.02));
+              ctx.stroke();
+            }
+          }
+        }
+        ctx.restore();
+      }
+
+      // Render Shooting Stars
+      createShootingStar();
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const st = shootingStars[i];
+        st.x += Math.cos(st.angle) * st.speed;
+        st.y += Math.sin(st.angle) * st.speed;
+        st.alpha -= 0.015;
+
+        if (st.alpha <= 0 || st.x > canvas.width || st.y > canvas.height) {
+          shootingStars.splice(i, 1);
+          continue;
+        }
+
+        const tailX = st.x - Math.cos(st.angle) * st.length;
+        const tailY = st.y - Math.sin(st.angle) * st.length;
+
+        const grad = ctx.createLinearGradient(st.x, st.y, tailX, tailY);
+        grad.addColorStop(0, 'rgba(255, 255, 255, ' + st.alpha + ')');
+        grad.addColorStop(0.3, 'rgba(86, 226, 241, ' + (st.alpha * 0.7) + ')');
+        grad.addColorStop(1, 'rgba(86, 226, 241, 0)');
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(st.x, st.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(renderStarfield);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', (e) => {
+      targetMouseX = e.clientX;
+      targetMouseY = e.clientY;
+    });
+
+    /* =========================================================================
+       3. WEB AUDIO SYNTHESIZER (CELESTIAL CHIMES & BLIPS)
+       ========================================================================= */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioCtx();
+      }
+    }
+
+    function playCelestialChime() {
+      if (!STATE.soundEnabled) return;
+      initAudio();
+
+      const now = audioCtx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + index * 0.08);
+
+        gain.gain.setValueAtTime(0.001, now + index * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.08 + 0.6);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + index * 0.08);
+        osc.stop(now + index * 0.08 + 0.6);
+      });
+    }
+
+    function playPaimonTextBlip() {
+      if (!STATE.soundEnabled) return;
+      initAudio();
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(700 + Math.random() * 300, now);
+
+      gain.gain.setValueAtTime(0.03, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.05);
+    }
+
+    function toggleSound() {
+      STATE.soundEnabled = !STATE.soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      const icon = document.getElementById('soundIcon');
+      if (STATE.soundEnabled) {
+        icon.className = 'fa-solid fa-volume-high';
+        btn.classList.remove('opacity-50');
+        showToast('Celestial Audio Enabled', 'info');
+        playCelestialChime();
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark';
+        btn.classList.add('opacity-50');
+        showToast('Celestial Audio Muted', 'info');
+      }
+    }
+
+    /* =========================================================================
+       4. TEXT-TO-SPEECH (PAIMON VOICE SYNTHESIS)
+       ========================================================================= */
+    function toggleTTS() {
+      STATE.ttsEnabled = !STATE.ttsEnabled;
+      const btn = document.getElementById('ttsToggleBtn');
+      if (STATE.ttsEnabled) {
+        btn.classList.add('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
+        btn.classList.remove('text-slate-400');
+        showToast("Paimon Voice Readouts Enabled!", 'success');
+        speakPaimonText("Paimon is ready to speak!");
+      } else {
+        btn.classList.remove('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
+        btn.classList.add('text-slate-400');
+        window.speechSynthesis.cancel();
+        showToast("Paimon Voice Muted", 'info');
+      }
+    }
+
+    function speakPaimonText(text) {
+      if (!STATE.ttsEnabled || !('speechSynthesis' in window)) return;
+
+      window.speechSynthesis.cancel();
+      // Clean markdown symbols for speech
+      const cleanText = text.replace(/[*_#`~\[\]]/g, '');
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.pitch = 1.7; // High cute pitch for Paimon!
+      utterance.rate = 1.05;
+
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha') || v.lang.startsWith('en'));
+      if (femaleVoice) utterance.voice = femaleVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    /* =========================================================================
+       5. PAIMON AVATAR & EXPRESSION SYSTEM
+       ========================================================================= */
+    const PAIMON_QUOTES = {
+      idle: [
+        "\"Traveler! Paimon is ready to search the Genshin Wiki Archives!\"",
+        "\"Is it time for a Sticky Honey Roast snack yet?\"",
+        "\"Teyvat has its own laws... and Paimon has all the wiki knowledge!\""
+      ],
+      thinking: [
+        "\"Hmm... Let Paimon check the celestial star archives for that!\"",
+        "\"Paimon is reading through thousands of wiki pages...\"",
+        "\"Hold on Traveler, Paimon's brain is working double-time!\""
+      ],
+      happy: [
+        "\"Ehe te nandayo?! Paimon found super cool information!\"",
+        "\"Woohoo! That was easier than opening a Common Chest!\"",
+        "\"Paimon deserves 100,000 Mora for finding that!\""
+      ],
+      shocked: [
+        "\"WHAT?! Paimon couldn't find anything on that in the Wiki Archives!\"",
+        "\"Ehh?! Are you sure that exists in Teyvat, Traveler?!\""
+      ],
+      eating: [
+        "\"Mmmph! Nom nom... Sticky Honey Roast is the absolute best!\""
+      ]
+    };
+
+    function setPaimonExpression(exp) {
+      STATE.currentExpression = exp;
+
+      // Hide all face dynamic groups
+      const elements = document.querySelectorAll('.expression-element');
+      elements.forEach(el => el.classList.add('hidden'));
+
+      // Show expression matching elements
+      const targetEye = document.getElementById('eye' + exp.charAt(0).toUpperCase() + exp.slice(1));
+      const targetMouth = document.getElementById('mouth' + exp.charAt(0).toUpperCase() + exp.slice(1));
+
+      if (targetEye) targetEye.classList.remove('hidden');
+      if (targetMouth) targetMouth.classList.remove('hidden');
+
+      // Update status badge
+      const badgeText = document.getElementById('statusBadgeText');
+      const badge = document.getElementById('paimonStatusBadge');
+      
+      const statusLabels = {
+        idle: 'Floating Idle',
+        thinking: 'Searching Archives...',
+        happy: 'Excited & Happy',
+        shocked: 'Paimon is Shocked!',
+        eating: 'Eating Honey Roast'
+      };
+      
+      if (badgeText) badgeText.textContent = statusLabels[exp] || 'Floating';
+
+      // Update banner quote
+      const bannerQuote = document.getElementById('paimonBannerQuote');
+      const quotes = PAIMON_QUOTES[exp] || PAIMON_QUOTES.idle;
+      if (bannerQuote) {
+        bannerQuote.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+      }
+
+      playCelestialChime();
+    }
+
+    function triggerRandomPaimonPhrase() {
+      const expressions = ['happy', 'eating', 'thinking'];
+      const pick = expressions[Math.floor(Math.random() * expressions.length)];
+      setPaimonExpression(pick);
+    }
+
+    /* =========================================================================
+       6. GENSHIN WIKI MEDIAWIKI API INTEGRATION
+       ========================================================================= */
+    async function fetchGenshinWikiContext(query) {
+      try {
+        updateProgress("Searching Genshin Wiki Archives...");
+        
+        // 1. Search Wiki Page Titles
+        const searchUrl = `https://genshin-impact.fandom.com/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
+        const searchResp = await fetch(searchUrl);
+        if (!searchResp.ok) throw new Error("Wiki Search Failed");
+        
+        const searchData = await searchResp.json();
+        const searchResults = searchData.query?.search || [];
+
+        if (searchResults.length === 0) {
+          return { contextText: "", pages: [] };
+        }
+
+        // Take top 3 relevant pages
+        const topPages = searchResults.slice(0, 3);
+        const pageIds = topPages.map(p => p.pageid).join('|');
+
+        updateProgress("Extracting Teyvat Lore Archives...");
+
+        // 2. Fetch Extracts and Full URLs for top pages
+        const extractUrl = `https://genshin-impact.fandom.com/api.php?action=query&prop=extracts|info&exintro=1&explaintext=1&inprop=url&pageids=${pageIds}&format=json&origin=*`;
+        const extractResp = await fetch(extractUrl);
+        if (!extractResp.ok) throw new Error("Wiki Extract Failed");
+
+        const extractData = await extractResp.json();
+        const pagesMap = extractData.query?.pages || {};
+
+        let combinedContext = "";
+        const wikiPagesList = [];
+
+        Object.values(pagesMap).forEach(page => {
+          if (page.extract && page.extract.trim().length > 0) {
+            combinedContext += `--- ARTICLE: ${page.title} ---\n${page.extract}\n\n`;
+            wikiPagesList.push({
+              title: page.title,
+              url: page.fullurl || `https://genshin-impact.fandom.com/wiki/${encodeURIComponent(page.title)}`
+            });
+          }
         });
 
-        function updateBadge() {
-            const badge = document.getElementById('key-badge');
-            if (groqApiKey) {
-                badge.innerText = "Key Set";
-                badge.className = "status-badge set";
-            } else {
-                badge.innerText = "No Key";
-                badge.className = "status-badge missing";
-            }
+        return {
+          contextText: combinedContext,
+          pages: wikiPagesList
+        };
+
+      } catch (err) {
+        console.warn("Wiki Fetching warning:", err);
+        return { contextText: "", pages: [] };
+      }
+    }
+
+    /* =========================================================================
+       7. GROQ API AI GENERATION
+       ========================================================================= */
+    async function callGroqApi(userPrompt, wikiContext) {
+      if (!STATE.apiKey) {
+        openApiKeyModal();
+        throw new Error("Please enter your Groq API Key first!");
+      }
+
+      const systemPrompt = `
+You are Paimon, the emergency food and faithful companion from Genshin Impact!
+
+PAIMON PERSONALITY GUIDELINES:
+- Speak in the third person as "Paimon" (e.g., "Paimon thinks...", "Paimon is hungry!").
+- Speak enthusiastically, playfully, and dramatically! Use trademark phrases like "Traveler!", "Ehe te nandayo?!", "Mora", "Sticky Honey Roast", "Listen here!".
+- Express love for delicious food and shiny Mora!
+
+STRICT KNOWLEDGE & WIKI GROUNDING RULES:
+1. You MUST answer the Traveler's question STRICTLY based on the provided Genshin Impact Wiki Context below.
+2. If the Wiki Context contains relevant details, use them to form your response and explicitly mention the article titles referenced (e.g. "According to Paimon's archives on [Article Title]...").
+3. CRITICAL: If the Wiki Context is empty, off-topic, or does NOT contain enough details to answer the query, Paimon MUST explicitly state: "Paimon searched high and low through the Celestial Star Archives, but Paimon couldn't find any information on that in the Genshin Wiki!" Do not invent facts or use non-Wiki lore!
+
+GENSHIN IMPACT WIKI ARCHIVES CONTEXT:
+${wikiContext || "NO WIKI MATCHES FOUND."}
+`;
+
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...STATE.chatHistory.slice(-4), // Last few turns context
+        { role: "user", content: userPrompt }
+      ];
+
+      updateProgress("Paimon is formulating response...");
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${STATE.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: STATE.model,
+          messages: messages,
+          temperature: 0.6,
+          max_tokens: 1024
+        })
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `Groq API Error (${response.status})`);
+      }
+
+      const data = await response.json();
+      return data.choices[0]?.message?.content || "Paimon got confused and couldn't answer!";
+    }
+
+    /* =========================================================================
+       8. CHAT CONTROLLER & UI RENDERING
+       ========================================================================= */
+    const chatMessagesContainer = document.getElementById('chatMessages');
+
+    function renderUserMessage(text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'flex items-start gap-3 justify-end max-w-2xl ml-auto';
+      msgDiv.innerHTML = `
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-400">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            <span class="font-cinzel font-bold text-xs text-cyan-300">TRAVELER</span>
+          </div>
+          <div class="p-4 rounded-2xl bg-gradient-to-r from-cyan-950 to-slate-900 border border-cyan-500/30 text-slate-100 text-sm leading-relaxed shadow-lg">
+            ${escapeHtml(text)}
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-cyan-400/20 border border-cyan-400/40 flex items-center justify-center shrink-0 text-cyan-300">
+          <i class="fa-solid fa-user-astronaut text-sm"></i>
+        </div>
+      `;
+      chatMessagesContainer.appendChild(msgDiv);
+      scrollToBottom();
+    }
+
+    function renderPaimonMessage(rawText, wikiPages = []) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'flex items-start gap-3.5 max-w-2xl';
+
+      const parsedHtml = marked.parse(rawText);
+
+      msgDiv.innerHTML = `
+        <div class="w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
+          <i class="fa-solid fa-crown text-sm"></i>
+        </div>
+        <div class="flex flex-col gap-1.5 flex-1">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-cinzel font-bold text-xs text-amber-300 tracking-wider">PAIMON</span>
+              <span class="text-[10px] text-slate-400">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <button onclick="copyToClipboard(\`${escapeForAttribute(rawText)}\`)" class="text-xs text-slate-400 hover:text-amber-300 transition-colors" title="Copy Answer">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-slate-100 text-sm leading-relaxed shadow-lg prose">
+            ${parsedHtml}
+          </div>
+        </div>
+      `;
+
+      chatMessagesContainer.appendChild(msgDiv);
+      scrollToBottom();
+
+      // Trigger Voice TTS
+      speakPaimonText(rawText);
+    }
+
+    function updateWikiSourcesDrawer(pages) {
+      const drawer = document.getElementById('wikiSourcesDrawer');
+      const container = document.getElementById('wikiSourcesContainer');
+
+      if (!pages || pages.length === 0) {
+        drawer.classList.add('hidden');
+        return;
+      }
+
+      container.innerHTML = pages.map(p => `
+        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 hover:bg-amber-500/20 text-xs transition-all">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-cyan-400"></i>
+          <span>${escapeHtml(p.title)}</span>
+        </a>
+      `).join('');
+
+      drawer.classList.remove('hidden');
+    }
+
+    function toggleWikiDrawer() {
+      document.getElementById('wikiSourcesDrawer').classList.add('hidden');
+    }
+
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+
+      const input = document.getElementById('userInput');
+      const query = input.value.trim();
+      if (!query) return;
+
+      if (!STATE.apiKey) {
+        openApiKeyModal();
+        showToast("Groq API Key is required to ask Paimon!", 'error');
+        return;
+      }
+
+      input.value = '';
+      renderUserMessage(query);
+
+      // Disable Send Button
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.disabled = true;
+
+      // Set Paimon to Thinking Expression
+      setPaimonExpression('thinking');
+      showProgress(true);
+
+      try {
+        // 1. Fetch Genshin MediaWiki archives
+        const { contextText, pages } = await fetchGenshinWikiContext(query);
+        STATE.lastWikiPages = pages;
+        updateWikiSourcesDrawer(pages);
+
+        // 2. Call Groq API
+        const paimonResponse = await callGroqApi(query, contextText);
+
+        // Update Chat History
+        STATE.chatHistory.push({ role: "user", content: query });
+        STATE.chatHistory.push({ role: "assistant", content: paimonResponse });
+
+        // 3. Render Response & Expression
+        if (paimonResponse.includes("couldn't find any information") || pages.length === 0) {
+          setPaimonExpression('shocked');
+        } else if (paimonResponse.toLowerCase().includes('honey roast') || paimonResponse.toLowerCase().includes('food')) {
+          setPaimonExpression('eating');
+        } else {
+          setPaimonExpression('happy');
         }
 
-        // Paimon System Persona Prompt
-        const paimonPrompt = `You are Paimon, the enthusiastic, food-loving guide from Genshin Impact.
-Rules:
-1. ALWAYS refer to yourself in the third person as "Paimon" (never say "I", "me", or "my").
-2. Be energetic, cheerful, and occasionally obsessed with Mora or delicious food (like Sticky Honey Roast or Slime Jelly). Use signature expressions like "Ehe!", "Ooh!", or "Paimon thinks...".
-3. If [WIKI CONTEXT] is provided, use it to accurately answer details about characters, weapons, ascension materials, or lore.
-4. Keep your formatting clean, readable, and engaging.`;
+        renderPaimonMessage(paimonResponse, pages);
 
-        // --- AUDIO ENGINE (Web Audio API) ---
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
+      } catch (err) {
+        console.error(err);
+        setPaimonExpression('shocked');
+        renderPaimonMessage(`**Ehh?! Something went wrong!** Paimon got the following error: \`${err.message}\``);
+        showToast(err.message, 'error');
+      } finally {
+        showProgress(false);
+        sendBtn.disabled = false;
+      }
+    }
 
-        function playSound(type) {
-            if (!isAudioEnabled) return;
-            try {
-                if (!audioCtx) audioCtx = new AudioContext();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
+    function sendQuickPrompt(promptText) {
+      document.getElementById('userInput').value = promptText;
+      handleChatSubmit();
+    }
 
-                if (type === 'send') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
-                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.1);
-                } else if (type === 'receive') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.2);
-                }
-            } catch (e) {
-                console.log("Audio skipped", e);
-            }
-        }
+    function clearChat() {
+      STATE.chatHistory = [];
+      chatMessagesContainer.innerHTML = '';
+      document.getElementById('wikiSourcesDrawer').classList.add('hidden');
+      setPaimonExpression('idle');
+      showToast("Celestial Observatory Chat Cleared!", 'info');
+    }
 
-        function toggleAudio() {
-            isAudioEnabled = !isAudioEnabled;
-            document.getElementById('audio-btn').innerText = isAudioEnabled ? "Audio: ON" : "Audio: OFF";
-        }
+    /* =========================================================================
+       9. MODAL HANDLERS & HELPERS
+       ========================================================================= */
+    function openApiKeyModal() {
+      document.getElementById('apiKeyInput').value = STATE.apiKey;
+      document.getElementById('modelSelect').value = STATE.model;
+      document.getElementById('apiKeyModal').classList.remove('hidden');
+    }
 
-        function toggleFactMode() {
-            isStrictFactMode = !isStrictFactMode;
-            document.getElementById('fact-mode-btn').innerText = isStrictFactMode ? "Mode: Strict Lore" : "Mode: Standard";
-            document.getElementById('fact-mode-btn').style.borderColor = isStrictFactMode ? "var(--paimon-highlight)" : "var(--border-gold)";
-        }
+    function closeApiKeyModal() {
+      document.getElementById('apiKeyModal').classList.add('hidden');
+    }
 
-        // --- BACKGROUND CANVAS (Stars Animation) ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
+    function toggleKeyVisibility() {
+      const input = document.getElementById('apiKeyInput');
+      const icon = document.getElementById('keyVisibilityIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    }
 
-        function initStars() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            stars = [];
-            for (let i = 0; i < 150; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.5,
-                    vx: Math.random() * 0.5 - 0.25,
-                    vy: Math.random() * 0.5 - 0.25,
-                    opacity: Math.random()
-                });
-            }
-        }
+    function saveApiKeySettings() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      const model = document.getElementById('modelSelect').value;
 
-        function animateStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(star => {
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-                ctx.fill();
+      STATE.apiKey = key;
+      STATE.model = model;
 
-                star.x += star.vx;
-                star.y += star.vy;
-                star.opacity += (Math.random() - 0.5) * 0.05;
-                if (star.opacity < 0) star.opacity = 0;
-                if (star.opacity > 1) star.opacity = 1;
+      localStorage.setItem('paimon_groq_api_key', key);
+      localStorage.setItem('paimon_groq_model', model);
 
-                if (star.x < 0) star.x = canvas.width;
-                if (star.x > canvas.width) star.x = 0;
-                if (star.y < 0) star.y = canvas.height;
-                if (star.y > canvas.height) star.y = 0;
-            });
-            requestAnimationFrame(animateStars);
-        }
+      document.getElementById('currentModelDisplay').textContent = model;
+      updateApiKeyBtnText();
 
-        window.addEventListener('resize', initStars);
-        initStars();
-        animateStars();
+      closeApiKeyModal();
+      showToast("Groq API Key & Model Saved Successfully!", 'success');
+      playCelestialChime();
+    }
 
-        // --- SETTINGS LOGIC ---
-        function openSettings() {
-            document.getElementById('api-key-input').value = groqApiKey;
-            document.getElementById('model-select').value = currentModel;
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
+    function updateApiKeyBtnText() {
+      const btnText = document.getElementById('apiKeyBtnText');
+      if (STATE.apiKey) {
+        btnText.textContent = "API Configured ✓";
+      } else {
+        btnText.textContent = "Configure Groq API";
+      }
+    }
 
-        function closeSettings() {
-            document.getElementById('settings-modal').styleI don't have access to past conversations, external bots, or previous designs to revert to. I cannot change my underlying system or adopt a different persona. 
+    function updateProgress(text) {
+      document.getElementById('progressText').textContent = text;
+      playPaimonTextBlip();
+    }
 
-I'm here and functioning as an AI assistant right now. If you need help with a specific topic, coding problem, or writing task, let me know what you'd like to work on.
+    function showProgress(show) {
+      const indicator = document.getElementById('progressIndicator');
+      if (show) {
+        indicator.classList.remove('hidden');
+      } else {
+        indicator.classList.add('hidden');
+      }
+    }
+
+    function scrollToBottom() {
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function copyToClipboard(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast("Paimon's response copied to clipboard!", 'success');
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const colors = {
+        success: 'bg-emerald-950/90 border-emerald-400/40 text-emerald-200',
+        error: 'bg-rose-950/90 border-rose-400/40 text-rose-200',
+        info: 'bg-slate-900/90 border-amber-500/40 text-amber-200'
+      };
+
+      toast.className = `px-4 py-2.5 rounded-xl border ${colors[type]} text-xs shadow-xl flex items-center gap-2 transition-all transform translate-y-2 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : (type === 'error' ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-info text-amber-400')}"></i>
+        <span>${escapeHtml(msg)}</span>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function escapeForAttribute(str) {
+      return str.replace(/`/g, "\\`").replace(/"/g, "&quot;");
+    }
+
+    /* =========================================================================
+       10. APPLICATION INITIALIZATION
+       ========================================================================= */
+    window.onload = function() {
+      resizeCanvas();
+      renderStarfield();
+      updateApiKeyBtnText();
+
+      // Check if API key is stored
+      if (!STATE.apiKey) {
+        setTimeout(() => {
+          openApiKeyModal();
+        }, 800);
+      }
+    };
+  </script>
+</body>
+</html>

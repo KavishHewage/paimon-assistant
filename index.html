@@ -1,1356 +1,568 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paimon's Celestial Observatory</title>
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Marked.js for Markdown parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            genshin: {
-              gold: '#f3cb63',
-              darkGold: '#c29738',
-              cyan: '#56e2f1',
-              blue: '#1c213d',
-              deepBg: '#090b16',
-              purple: '#9d5bf0',
-              glass: 'rgba(18, 22, 46, 0.85)'
-            }
-          },
-          fontFamily: {
-            cinzel: ['Cinzel', 'serif'],
-            sans: ['Inter', 'sans-serif']
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paimon's Celestial Observatory</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(15, 23, 42, 0.85);
+            --text-main: #e2e8f0;
+            --accent-blue: #38bdf8;
+            --accent-gold: #fbbf24;
+            --user-msg: rgba(56, 189, 248, 0.15);
+            --paimon-msg: rgba(251, 191, 36, 0.15);
         }
-      }
-    }
-  </script>
 
-  <style>
-    body {
-      background-color: #090b16;
-      color: #e2e8f0;
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-    }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+        }
 
-    .font-cinzel {
-      font-family: 'Cinzel', serif;
-    }
+        /* 3D Starfield Canvas */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
 
-    /* Custom Glassmorphism */
-    .glass-panel {
-      background: rgba(15, 20, 42, 0.82);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(243, 203, 99, 0.25);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    }
+        /* Top Navigation / Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 30px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(11,15,25,0.9), transparent);
+        }
 
-    .glass-input {
-      background: rgba(9, 11, 22, 0.85);
-      border: 1px solid rgba(243, 203, 99, 0.3);
-    }
-    .glass-input:focus {
-      border-color: #56e2f1;
-      box-shadow: 0 0 12px rgba(86, 226, 241, 0.4);
-    }
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
 
-    /* Custom Scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(9, 11, 22, 0.6);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(243, 203, 99, 0.4);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(243, 203, 99, 0.8);
-    }
+        .settings-btn {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .settings-btn:hover {
+            background: var(--accent-blue);
+            color: #fff;
+        }
 
-    /* Floating Keyframe for Paimon Avatar */
-    @keyframes paimonFloat {
-      0%, 100% {
-        transform: translateY(0px) rotate(0deg);
-      }
-      50% {
-        transform: translateY(-10px) rotate(1.5deg);
-      }
-    }
+        /* Paimon Stationary Image */
+        #paimon-container {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 350px;
+            z-index: 5;
+            animation: float 4s ease-in-out infinite;
+        }
+        #paimon-container img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+            border: 2px solid rgba(56, 189, 248, 0.2);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
 
-    .paimon-float {
-      animation: paimonFloat 3.8s ease-in-out infinite;
-    }
+        /* Chat Interface */
+        #chat-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 450px;
+            height: 70vh;
+            background: var(--panel-bg);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-    /* Celestial Glowing Text */
-    .text-glow-gold {
-      text-shadow: 0 0 10px rgba(243, 203, 99, 0.6), 0 0 20px rgba(243, 203, 99, 0.2);
-    }
+        #chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-    /* Markdown Styling in Messages */
-    .prose strong { color: #f3cb63; }
-    .prose a { color: #56e2f1; text-decoration: underline; }
-    .prose code { background: rgba(243, 203, 99, 0.15); color: #f3cb63; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-    .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
-    .prose p { margin-bottom: 0.5rem; line-height: 1.6; }
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
 
-    /* Keyframe Pulse for Crown Glow */
-    @keyframes haloPulse {
-      0%, 100% { opacity: 0.7; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.08); }
-    }
-    .halo-glow {
-      animation: haloPulse 3s infinite ease-in-out;
-      transform-origin: center;
-    }
-  </style>
+        .message.user {
+            align-self: flex-end;
+            background: var(--user-msg);
+            border: 1px solid var(--accent-blue);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.paimon {
+            align-self: flex-start;
+            background: var(--paimon-msg);
+            border: 1px solid var(--accent-gold);
+            border-bottom-left-radius: 2px;
+        }
+
+        .wiki-source {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 8px;
+            display: block;
+            text-decoration: none;
+        }
+        .wiki-source:hover {
+            text-decoration: underline;
+            color: var(--accent-blue);
+        }
+
+        #input-area {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #chat-input {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        #chat-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        #send-btn {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Modal */
+        #settings-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--accent-gold);
+            width: 400px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--accent-gold);
+        }
+
+        .modal-content label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .modal-content button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col relative text-slate-100">
+<body>
 
-  <!-- Animated Starfield Canvas -->
-  <canvas id="starfieldCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+    <!-- Starfield Background -->
+    <canvas id="starfield"></canvas>
 
-  <!-- Top Navigation / Header -->
-  <header class="relative z-10 glass-panel border-b border-amber-500/20 px-4 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 via-amber-200 to-cyan-400 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center">
-        <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
-          <i class="fa-solid font-cinzel fa-compass text-amber-300 text-lg"></i>
-        </div>
-      </div>
-      <div>
-        <h1 class="font-cinzel text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-cyan-300 text-glow-gold">
-          Paimon's Celestial Observatory
-        </h1>
-        <p class="text-xs text-amber-200/70 tracking-wider">GENSHIN IMPACT WIKI ARCHIVES & COMPANION</p>
-      </div>
+    <header>
+        <h1>Paimon's Celestial Observatory ✨</h1>
+        <button class="settings-btn" onclick="openModal()">⚙️ Settings</button>
+    </header>
+
+    <!-- Stationary Paimon Image -->
+    <div id="paimon-container">
+        <img src="watermarked_img_11313802410788328453.jpg" alt="Paimon">
     </div>
 
-    <!-- Header Controls -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Web Audio Sound Toggle -->
-      <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-amber-300 text-xs sm:text-sm flex items-center gap-2 transition-all">
-        <i id="soundIcon" class="fa-solid fa-volume-high"></i>
-        <span class="hidden sm:inline">Audio</span>
-      </button>
-
-      <!-- Speech Synthesis TTS Toggle -->
-      <button id="ttsToggleBtn" onclick="toggleTTS()" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-slate-400 text-xs sm:text-sm flex items-center gap-2 transition-all">
-        <i id="ttsIcon" class="fa-solid fa-comment-dots"></i>
-        <span class="hidden sm:inline">Paimon Voice</span>
-      </button>
-
-      <!-- API Key Modal Trigger -->
-      <button onclick="openApiKeyModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold text-xs sm:text-sm shadow-md shadow-amber-500/20 flex items-center gap-2 transition-all">
-        <i class="fa-solid fa-key"></i>
-        <span id="apiKeyBtnText">Configure Groq API</span>
-      </button>
-    </div>
-  </header>
-
-  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-    <!-- Left Column: Paimon Avatar & Inquiries -->
-    <section class="lg:col-span-4 flex flex-col gap-4">
-      
-      <!-- Paimon Card & Dynamic SVG Avatar -->
-      <div class="glass-panel rounded-2xl p-5 border border-amber-500/30 flex flex-col items-center text-center relative overflow-hidden">
-        
-        <div class="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-        <!-- Expression Status Badge -->
-        <div class="self-end mb-2">
-          <span id="paimonStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-950/80 border border-cyan-400/30 text-cyan-300">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            <span id="statusBadgeText">Floating Idle</span>
-          </span>
-        </div>
-
-        <!-- SVG Avatar Wrapper -->
-        <div class="relative w-48 h-48 sm:w-56 sm:h-56 paimon-float my-2 flex items-center justify-center">
-          
-          <svg id="paimonSvg" viewBox="0 0 300 300" class="w-full h-full drop-shadow-[0_10px_20px_rgba(243,203,99,0.25)]">
-            <defs>
-              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#ffe8a3"/>
-                <stop offset="100%" stop-color="#f3cb63"/>
-              </linearGradient>
-              <linearGradient id="capeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#0f1638"/>
-                <stop offset="100%" stop-color="#1c2759"/>
-              </linearGradient>
-              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-
-            <!-- Halo Crown -->
-            <g class="halo-glow">
-              <ellipse cx="150" cy="52" rx="55" ry="14" fill="none" stroke="url(#goldGrad)" stroke-width="4" filter="url(#glow)"/>
-              <polygon points="150,30 154,42 166,42 156,50 160,62 150,54 140,62 144,50 134,42 146,42" fill="#ffe8a3"/>
-            </g>
-
-            <!-- Cape -->
-            <path d="M 80 190 Q 150 215 220 190 Q 235 260 150 280 Q 65 260 80 190 Z" fill="url(#capeGrad)" stroke="#f3cb63" stroke-width="2"/>
-            <circle cx="110" cy="230" r="2.5" fill="#56e2f1" />
-            <circle cx="190" cy="235" r="2" fill="#ffe8a3" />
-            <circle cx="150" cy="250" r="3" fill="#ffffff" />
-            <polygon points="130,225 132,229 136,229 133,231 134,235 130,233 126,235 127,231 124,229 128,229" fill="#f3cb63"/>
-
-            <!-- Hair Back -->
-            <path d="M 75 120 C 60 170 85 200 110 205 C 150 210 190 210 230 205 C 255 200 280 170 265 120 C 250 80 200 75 150 75 C 100 75 90 80 75 120 Z" fill="#e2e8f0"/>
-
-            <!-- Head -->
-            <ellipse cx="150" cy="140" rx="60" ry="52" fill="#fff1e6"/>
-
-            <!-- Bangs -->
-            <path d="M 90 120 Q 120 125 150 100 Q 180 125 210 120 Q 225 140 215 160 C 200 120 180 110 150 112 C 120 110 100 120 85 160 Q 75 140 90 120 Z" fill="#f8fafc"/>
-            <path d="M 135 110 Q 150 130 165 110 Q 150 105 135 110 Z" fill="#e2e8f0"/>
-            <path d="M 100 102 L 115 90 L 125 105 Z" fill="#1c213d" stroke="#f3cb63" stroke-width="2"/>
-
-            <!-- DYNAMIC EXPRESSIONS -->
-            <g id="paimonFaceGroup">
-              <!-- IDLE -->
-              <g id="eyeIdle" class="expression-element">
-                <ellipse cx="120" cy="142" rx="9" ry="14" fill="#1e1b4b"/>
-                <ellipse cx="120" cy="142" rx="7" ry="11" fill="#4338ca"/>
-                <circle cx="118" cy="137" r="3.5" fill="#ffffff"/>
-                <circle cx="122" cy="147" r="1.5" fill="#56e2f1"/>
-                <ellipse cx="180" cy="142" rx="9" ry="14" fill="#1e1b4b"/>
-                <ellipse cx="180" cy="142" rx="7" ry="11" fill="#4338ca"/>
-                <circle cx="178" cy="137" r="3.5" fill="#ffffff"/>
-                <circle cx="182" cy="147" r="1.5" fill="#56e2f1"/>
-              </g>
-
-              <!-- THINKING -->
-              <g id="eyeThinking" class="expression-element hidden">
-                <ellipse cx="122" cy="138" rx="8" ry="12" fill="#1e1b4b"/>
-                <circle cx="120" cy="134" r="3" fill="#ffffff"/>
-                <ellipse cx="182" cy="138" rx="8" ry="12" fill="#1e1b4b"/>
-                <circle cx="180" cy="134" r="3" fill="#ffffff"/>
-                <text x="205" y="115" fill="#f3cb63" font-size="22" font-weight="bold" font-family="sans-serif">?</text>
-              </g>
-
-              <!-- HAPPY -->
-              <g id="eyeHappy" class="expression-element hidden">
-                <path d="M 110 145 Q 120 132 130 145" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
-                <path d="M 170 145 Q 180 132 190 145" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
-                <polygon points="75,100 80,110 90,110 82,116 85,126 75,120 65,126 68,116 60,110 70,110" fill="#f3cb63" opacity="0.8"/>
-                <polygon points="225,100 230,110 240,110 232,116 235,126 225,120 215,126 218,116 210,110 220,110" fill="#f3cb63" opacity="0.8"/>
-              </g>
-
-              <!-- SHOCKED -->
-              <g id="eyeShocked" class="expression-element hidden">
-                <circle cx="120" cy="142" r="12" fill="#ffffff" stroke="#1e1b4b" stroke-width="3"/>
-                <circle cx="120" cy="142" r="3" fill="#1e1b4b"/>
-                <circle cx="180" cy="142" r="12" fill="#ffffff" stroke="#1e1b4b" stroke-width="3"/>
-                <circle cx="180" cy="142" r="3" fill="#1e1b4b"/>
-                <path d="M 205 125 C 205 120 212 110 212 110 C 212 110 219 120 219 125 C 219 129 216 132 212 132 C 208 132 205 129 205 125 Z" fill="#56e2f1"/>
-              </g>
-
-              <!-- EATING -->
-              <g id="eyeEating" class="expression-element hidden">
-                <path d="M 110 140 Q 120 148 130 140" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round"/>
-                <path d="M 170 140 Q 180 148 190 140" fill="none" stroke="#1e1b4b" stroke-width="3.5" stroke-linecap="round"/>
-              </g>
-
-              <ellipse cx="105" cy="155" rx="8" ry="4" fill="#f43f5e" opacity="0.4"/>
-              <ellipse cx="195" cy="155" rx="8" ry="4" fill="#f43f5e" opacity="0.4"/>
-
-              <!-- MOUTHS -->
-              <path id="mouthIdle" class="expression-element" d="M 142 162 Q 150 168 158 162" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
-              <ellipse id="mouthThinking" class="expression-element hidden" cx="150" cy="165" rx="4" ry="5" fill="#9f1239"/>
-              <path id="mouthHappy" class="expression-element hidden" d="M 140 160 Q 150 176 160 160 Z" fill="#9f1239"/>
-              <ellipse id="mouthShocked" class="expression-element hidden" cx="150" cy="166" rx="8" ry="10" fill="#9f1239"/>
-              
-              <g id="mouthEating" class="expression-element hidden">
-                <path d="M 142 163 Q 150 156 158 163" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
-                <g transform="translate(135, 168) rotate(-10) scale(0.7)">
-                  <path d="M 10 10 L 35 5 C 45 15 40 30 25 30 L 10 20 Z" fill="#b45309" stroke="#78350f" stroke-width="2"/>
-                  <rect x="0" y="15" width="12" height="6" rx="3" fill="#f8fafc" stroke="#cbd5e1"/>
-                  <circle cx="28" cy="18" r="3" fill="#f3cb63"/>
-                </g>
-              </g>
-            </g>
-          </svg>
-        </div>
-
-        <div class="mt-2 w-full bg-slate-900/90 border border-amber-500/20 rounded-xl p-3 text-xs sm:text-sm text-amber-100/90 italic leading-relaxed">
-          <i class="fa-solid fa-quote-left text-amber-400/50 mr-1.5"></i>
-          <span id="paimonBannerQuote">"Traveler! Paimon is ready to search the Genshin Wiki Archives! Ask Paimon anything about Teyvat!"</span>
-          <i class="fa-solid fa-quote-right text-amber-400/50 ml-1.5"></i>
-        </div>
-
-        <div class="mt-4 flex flex-wrap justify-center gap-1.5 w-full">
-          <button onclick="setPaimonExpression('idle')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Floating</button>
-          <button onclick="setPaimonExpression('happy')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Excited</button>
-          <button onclick="setPaimonExpression('thinking')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Thinking</button>
-          <button onclick="setPaimonExpression('shocked')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Shocked!</button>
-          <button onclick="setPaimonExpression('eating')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-amber-200 border border-amber-500/20">Honey Roast</button>
-        </div>
-      </div>
-
-      <div class="glass-panel rounded-2xl p-4 border border-amber-500/30 flex flex-col gap-2.5">
-        <h3 class="font-cinzel text-xs font-bold text-amber-300 tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
-          CELESTIAL INQUIRIES
-        </h3>
-        <div class="flex flex-col gap-1.5 text-xs">
-          <button onclick="sendQuickPrompt('Tell me about the Raiden Shogun lore and background')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
-            <span>⚡ Raiden Shogun Lore</span>
-            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-          </button>
-          <button onclick="sendQuickPrompt('What is Sticky Honey Roast and how do you make it?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
-            <span>🍖 Sticky Honey Roast Recipe</span>
-            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-          </button>
-          <button onclick="sendQuickPrompt('Who are the Eleven Fatui Harbingers and who is Number 1?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
-            <span>🎭 Eleven Fatui Harbingers</span>
-            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-          </button>
-          <button onclick="sendQuickPrompt('How do Primogems and Wishing system work in Genshin Impact?')" class="p-2 rounded-lg bg-slate-900/60 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-400/50 text-left text-slate-200 transition-all flex items-center justify-between group">
-            <span>✨ Primogems & Wish System</span>
-            <i class="fa-solid fa-angle-right text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-          </button>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- Right Column: Interactive Chat Interface -->
-    <section class="lg:col-span-8 flex flex-col h-[700px] glass-panel rounded-2xl border border-amber-500/30 overflow-hidden shadow-2xl">
-      
-      <!-- Chat Header -->
-      <div class="px-5 py-3.5 bg-slate-950/80 border-b border-amber-500/20 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-3 h-3 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse"></div>
-          <span class="font-cinzel text-sm font-semibold text-amber-200">Genshin Wiki Sync Active</span>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <span id="currentModelDisplay" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5">
-            <i class="fa-solid fa-microchip text-[10px]"></i>
-            <span id="modelLabelText">Detecting Model...</span>
-          </span>
-          <button onclick="clearChat()" title="Clear Observatory Logs" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Messages Display Area -->
-      <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-5">
-        
-        <div class="flex items-start gap-3.5 max-w-2xl">
-          <div class="w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
-            <i class="fa-solid fa-crown text-sm"></i>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <div class="flex items-center gap-2">
-              <span class="font-cinzel font-bold text-xs text-amber-300 tracking-wider">PAIMON</span>
-              <span class="text-[10px] text-slate-400">Observatory System</span>
+    <!-- Chat UI -->
+    <div id="chat-container">
+        <div id="chat-history">
+            <div class="message paimon">
+                Greetings, Traveler! Welcome to Paimon's Celestial Observatory! ✨<br><br>
+                Paimon is connected to the Genshin Impact Wiki Archives. Set your Groq API key in the settings to start stargazing and asking questions!
             </div>
-            <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-slate-100 text-sm leading-relaxed shadow-lg">
-              <p class="mb-2">Greetings, Traveler! Welcome to <strong>Paimon's Celestial Observatory</strong>! ✨</p>
-              <p>Paimon has upgraded the observatory telescope with <strong>Dynamic Model Auto-Detection</strong>! When you enter your Groq API Key, Paimon will automatically query available active endpoints from Groq and auto-heal if any model becomes decommissioned!</p>
-              <p class="mt-2 text-xs text-amber-300/80 italic">Configure your Groq API Key using the top right button to sync and stargaze!</p>
-            </div>
-          </div>
         </div>
-
-      </div>
-
-      <!-- Progress Indicator -->
-      <div id="progressIndicator" class="hidden px-5 py-2 bg-slate-900/90 border-t border-amber-500/20 flex items-center gap-3 text-xs text-cyan-300">
-        <i class="fa-solid fa-spinner fa-spin text-amber-400"></i>
-        <span id="progressText">Gazing into Celestial Stars...</span>
-      </div>
-
-      <!-- Sourced Wiki Drawer -->
-      <div id="wikiSourcesDrawer" class="hidden border-t border-amber-500/20 bg-slate-950/90 p-3 max-h-36 overflow-y-auto">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-cinzel text-amber-300 font-bold flex items-center gap-1.5">
-            <i class="fa-solid fa-book-bookmark text-cyan-400"></i>
-            CONSULTED WIKI ARCHIVES
-          </span>
-          <button onclick="toggleWikiDrawer()" class="text-xs text-slate-400 hover:text-slate-200">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+        <div id="input-area">
+            <input type="text" id="chat-input" placeholder="Ask Paimon about Teyvat..." onkeypress="handleEnter(event)">
+            <button id="send-btn" onclick="sendMessage()">Send</button>
         </div>
-        <div id="wikiSourcesContainer" class="flex flex-wrap gap-2"></div>
-      </div>
-
-      <!-- Input Form -->
-      <div class="p-3 sm:p-4 bg-slate-950/90 border-t border-amber-500/20">
-        <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex gap-2 items-center">
-          <div class="relative flex-1">
-            <input 
-              type="text" 
-              id="userInput" 
-              placeholder="Ask Paimon about Teyvat lore, characters, items, quests..." 
-              class="w-full px-4 py-3 rounded-xl glass-input text-slate-100 placeholder-slate-400 text-sm focus:outline-none transition-all pr-10"
-              autocomplete="off"
-            />
-            <button type="button" onclick="triggerRandomPaimonPhrase()" class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-200 transition-colors" title="Poke Paimon!">
-              <i class="fa-solid fa-wand-sparkles text-sm"></i>
-            </button>
-          </div>
-
-          <button 
-            type="submit" 
-            id="sendBtn"
-            class="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
-          >
-            <span>Ask</span>
-            <i class="fa-solid fa-paper-plane text-xs"></i>
-          </button>
-        </form>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- Groq API Key & Settings Modal -->
-  <div id="apiKeyModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-amber-500/40 shadow-2xl relative">
-      <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-amber-300">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center text-amber-300">
-          <i class="fa-solid fa-key text-lg"></i>
-        </div>
-        <div>
-          <h2 class="font-cinzel font-bold text-lg text-amber-200">Groq API & Model Setup</h2>
-          <p class="text-xs text-slate-400">Configure your key & auto-detect live models!</p>
-        </div>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-amber-300 mb-1.5">Groq API Key (`gsk_...`)</label>
-          <div class="relative">
-            <input 
-              type="password" 
-              id="apiKeyInput" 
-              placeholder="gsk_..." 
-              oninput="handleApiKeyInputChange()"
-              class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none pr-10"
-            />
-            <button type="button" onclick="toggleKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300">
-              <i id="keyVisibilityIcon" class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1">
-            Get a free API key at <a href="https://console.groq.com/" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">console.groq.com</a>.
-          </p>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-xs font-medium text-amber-300">Active Groq Model</label>
-            <button type="button" onclick="manualDetectModels()" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1">
-              <i id="detectSpinIcon" class="fa-solid fa-rotate"></i>
-              <span>Auto-Detect Models</span>
-            </button>
-          </div>
-          
-          <select id="modelSelect" onchange="handleModelSelectChange()" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-slate-100 text-sm focus:outline-none bg-slate-900">
-            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Recommended)</option>
-            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fast)</option>
-            <option value="llama3-70b-8192">llama3-70b-8192</option>
-            <option value="llama3-8b-8192">llama3-8b-8192</option>
-            <option value="gemma2-9b-it">gemma2-9b-it</option>
-            <option value="qwen-2.5-32b">qwen-2.5-32b</option>
-          </select>
-          <p id="modelStatusHint" class="text-[10px] text-emerald-400 mt-1 hidden">
-            <i class="fa-solid fa-circle-check mr-1"></i>Live models queried directly from Groq!
-          </p>
-        </div>
-
-        <div class="pt-2 flex justify-end gap-2">
-          <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">
-            Cancel
-          </button>
-          <button onclick="saveApiKeySettings()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs shadow-md">
-            Save & Connect
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <script>
-    const FALLBACK_MODELS = [
-      'llama-3.3-70b-versatile',
-      'llama-3.1-8b-instant',
-      'llama3-70b-8192',
-      'llama3-8b-8192',
-      'gemma2-9b-it',
-      'qwen-2.5-32b',
-      'deepseek-r1-distill-llama-70b'
-    ];
-
-    const STATE = {
-      apiKey: localStorage.getItem('paimon_groq_api_key') || '',
-      model: localStorage.getItem('paimon_groq_model') || 'llama-3.3-70b-versatile',
-      availableModels: [],
-      soundEnabled: true,
-      ttsEnabled: false,
-      currentExpression: 'idle',
-      lastWikiPages: [],
-      chatHistory: []
-    };
-
-    const canvas = document.getElementById('starfieldCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    let stars = [];
-    let shootingStars = [];
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetMouseX = 0;
-    let targetMouseY = 0;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initStars();
-    }
-
-    function initStars() {
-      stars = [];
-      const count = Math.floor((canvas.width * canvas.height) / 3000);
-      for (let i = 0; i < count; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          z: Math.random() * canvas.width,
-          size: Math.random() * 1.5 + 0.5,
-          color: Math.random() > 0.3 ? '#ffffff' : (Math.random() > 0.5 ? '#f3cb63' : '#56e2f1'),
-          alpha: Math.random(),
-          twinkleSpeed: (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1)
-        });
-      }
-    }
-
-    function createShootingStar() {
-      if (Math.random() < 0.02 && shootingStars.length < 3) {
-        shootingStars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * (canvas.height / 2),
-          length: Math.random() * 80 + 40,
-          speed: Math.random() * 10 + 6,
-          angle: Math.PI / 4 + (Math.random() * 0.2 - 0.1),
-          alpha: 1
-        });
-      }
-    }
-
-    function renderStarfield() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      mouseX += (targetMouseX - mouseX) * 0.05;
-      mouseY += (targetMouseY - mouseY) * 0.05;
-
-      const nebulaGrad = ctx.createRadialGradient(
-        canvas.width * 0.3 + mouseX * 0.05, 
-        canvas.height * 0.3 + mouseY * 0.05, 
-        50, 
-        canvas.width * 0.5, 
-        canvas.height * 0.5, 
-        canvas.width * 0.8
-      );
-      nebulaGrad.addColorStop(0, 'rgba(30, 27, 75, 0.35)');
-      nebulaGrad.addColorStop(0.5, 'rgba(15, 23, 42, 0.2)');
-      nebulaGrad.addColorStop(1, 'rgba(9, 11, 22, 0)');
-      ctx.fillStyle = nebulaGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < stars.length; i++) {
-        const s = stars[i];
-
-        s.alpha += s.twinkleSpeed;
-        if (s.alpha > 1 || s.alpha < 0.2) s.twinkleSpeed = -s.twinkleSpeed;
-
-        const px = s.x + (mouseX - canvas.width / 2) * (s.size * 0.02);
-        const py = s.y + (mouseY - canvas.height / 2) * (s.size * 0.02);
-
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, Math.min(1, s.alpha));
-        ctx.fillStyle = s.color;
-        ctx.beginPath();
-        ctx.arc(px, py, s.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (i % 8 === 0) {
-          for (let j = i + 1; j < i + 4 && j < stars.length; j++) {
-            const s2 = stars[j];
-            const dist = Math.hypot(s.x - s2.x, s.y - s2.y);
-            if (dist < 90) {
-              ctx.strokeStyle = 'rgba(243, 203, 99, ' + (0.15 - dist / 600) + ')';
-              ctx.lineWidth = 0.5;
-              ctx.beginPath();
-              ctx.moveTo(px, py);
-              ctx.lineTo(s2.x + (mouseX - canvas.width / 2) * (s2.size * 0.02), s2.y + (mouseY - canvas.height / 2) * (s2.size * 0.02));
-              ctx.stroke();
-            }
-          }
-        }
-        ctx.restore();
-      }
-
-      createShootingStar();
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const st = shootingStars[i];
-        st.x += Math.cos(st.angle) * st.speed;
-        st.y += Math.sin(st.angle) * st.speed;
-        st.alpha -= 0.015;
-
-        if (st.alpha <= 0 || st.x > canvas.width || st.y > canvas.height) {
-          shootingStars.splice(i, 1);
-          continue;
-        }
-
-        const tailX = st.x - Math.cos(st.angle) * st.length;
-        const tailY = st.y - Math.sin(st.angle) * st.length;
-
-        const grad = ctx.createLinearGradient(st.x, st.y, tailX, tailY);
-        grad.addColorStop(0, 'rgba(255, 255, 255, ' + st.alpha + ')');
-        grad.addColorStop(0.3, 'rgba(86, 226, 241, ' + (st.alpha * 0.7) + ')');
-        grad.addColorStop(1, 'rgba(86, 226, 241, 0)');
-
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(st.x, st.y);
-        ctx.lineTo(tailX, tailY);
-        ctx.stroke();
-      }
-
-      requestAnimationFrame(renderStarfield);
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('mousemove', (e) => {
-      targetMouseX = e.clientX;
-      targetMouseY = e.clientY;
-    });
-
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new AudioCtx();
-      }
-    }
-
-    function playCelestialChime() {
-      if (!STATE.soundEnabled) return;
-      initAudio();
-
-      const now = audioCtx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.50];
-      
-      notes.forEach((freq, index) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + index * 0.08);
-
-        gain.gain.setValueAtTime(0.001, now + index * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.08 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.08 + 0.6);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start(now + index * 0.08);
-        osc.stop(now + index * 0.08 + 0.6);
-      });
-    }
-
-    function playPaimonTextBlip() {
-      if (!STATE.soundEnabled) return;
-      initAudio();
-
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(700 + Math.random() * 300, now);
-
-      gain.gain.setValueAtTime(0.03, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.05);
-    }
-
-    function toggleSound() {
-      STATE.soundEnabled = !STATE.soundEnabled;
-      const btn = document.getElementById('soundToggleBtn');
-      const icon = document.getElementById('soundIcon');
-      if (STATE.soundEnabled) {
-        icon.className = 'fa-solid fa-volume-high';
-        btn.classList.remove('opacity-50');
-        showToast('Celestial Audio Enabled', 'info');
-        playCelestialChime();
-      } else {
-        icon.className = 'fa-solid fa-volume-xmark';
-        btn.classList.add('opacity-50');
-        showToast('Celestial Audio Muted', 'info');
-      }
-    }
-
-    function toggleTTS() {
-      STATE.ttsEnabled = !STATE.ttsEnabled;
-      const btn = document.getElementById('ttsToggleBtn');
-      if (STATE.ttsEnabled) {
-        btn.classList.add('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
-        btn.classList.remove('text-slate-400');
-        showToast("Paimon Voice Readouts Enabled!", 'success');
-        speakPaimonText("Paimon is ready to speak!");
-      } else {
-        btn.classList.remove('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
-        btn.classList.add('text-slate-400');
-        window.speechSynthesis.cancel();
-        showToast("Paimon Voice Muted", 'info');
-      }
-    }
-
-    function speakPaimonText(text) {
-      if (!STATE.ttsEnabled || !('speechSynthesis' in window)) return;
-
-      window.speechSynthesis.cancel();
-      const cleanText = text.replace(/[*_#`~\[\]]/g, '');
-
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.pitch = 1.7;
-      utterance.rate = 1.05;
-
-      const voices = window.speechSynthesis.getVoices();
-      const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha') || v.lang.startsWith('en'));
-      if (femaleVoice) utterance.voice = femaleVoice;
-
-      window.speechSynthesis.speak(utterance);
-    }
-
-    const PAIMON_QUOTES = {
-      idle: [
-        "\"Traveler! Paimon is ready to search the Genshin Wiki Archives!\"",
-        "\"Is it time for a Sticky Honey Roast snack yet?\"",
-        "\"Teyvat has its own laws... and Paimon has all the wiki knowledge!\""
-      ],
-      thinking: [
-        "\"Hmm... Let Paimon check the celestial star archives for that!\"",
-        "\"Paimon is reading through thousands of wiki pages...\"",
-        "\"Hold on Traveler, Paimon's brain is working double-time!\""
-      ],
-      happy: [
-        "\"Ehe te nandayo?! Paimon found super cool information!\"",
-        "\"Woohoo! That was easier than opening a Common Chest!\"",
-        "\"Paimon deserves 100,000 Mora for finding that!\""
-      ],
-      shocked: [
-        "\"WHAT?! Paimon couldn't find anything on that in the Wiki Archives!\"",
-        "\"Ehh?! Are you sure that exists in Teyvat, Traveler?!\""
-      ],
-      eating: [
-        "\"Mmmph! Nom nom... Sticky Honey Roast is the absolute best!\""
-      ]
-    };
-
-    function setPaimonExpression(exp) {
-      STATE.currentExpression = exp;
-
-      const elements = document.querySelectorAll('.expression-element');
-      elements.forEach(el => el.classList.add('hidden'));
-
-      const targetEye = document.getElementById('eye' + exp.charAt(0).toUpperCase() + exp.slice(1));
-      const targetMouth = document.getElementById('mouth' + exp.charAt(0).toUpperCase() + exp.slice(1));
-
-      if (targetEye) targetEye.classList.remove('hidden');
-      if (targetMouth) targetMouth.classList.remove('hidden');
-
-      const badgeText = document.getElementById('statusBadgeText');
-      const statusLabels = {
-        idle: 'Floating Idle',
-        thinking: 'Searching Archives...',
-        happy: 'Excited & Happy',
-        shocked: 'Paimon is Shocked!',
-        eating: 'Eating Honey Roast'
-      };
-      
-      if (badgeText) badgeText.textContent = statusLabels[exp] || 'Floating';
-
-      const bannerQuote = document.getElementById('paimonBannerQuote');
-      const quotes = PAIMON_QUOTES[exp] || PAIMON_QUOTES.idle;
-      if (bannerQuote) {
-        bannerQuote.textContent = quotes[Math.floor(Math.random() * quotes.length)];
-      }
-
-      playCelestialChime();
-    }
-
-    function triggerRandomPaimonPhrase() {
-      const expressions = ['happy', 'eating', 'thinking'];
-      const pick = expressions[Math.floor(Math.random() * expressions.length)];
-      setPaimonExpression(pick);
-    }
-
-    async function fetchGenshinWikiContext(query) {
-      try {
-        updateProgress("Searching Genshin Wiki Archives...");
-        
-        const searchUrl = `https://genshin-impact.fandom.com/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
-        const searchResp = await fetch(searchUrl);
-        if (!searchResp.ok) throw new Error("Wiki Search Failed");
-        
-        const searchData = await searchResp.json();
-        const searchResults = searchData.query?.search || [];
-
-        if (searchResults.length === 0) {
-          return { contextText: "", pages: [] };
-        }
-
-        const topPages = searchResults.slice(0, 3);
-        const pageIds = topPages.map(p => p.pageid).join('|');
-
-        updateProgress("Extracting Teyvat Lore Archives...");
-
-        const extractUrl = `https://genshin-impact.fandom.com/api.php?action=query&prop=extracts|info&exintro=1&explaintext=1&inprop=url&pageids=${pageIds}&format=json&origin=*`;
-        const extractResp = await fetch(extractUrl);
-        if (!extractResp.ok) throw new Error("Wiki Extract Failed");
-
-        const extractData = await extractResp.json();
-        const pagesMap = extractData.query?.pages || {};
-
-        let combinedContext = "";
-        const wikiPagesList = [];
-
-        Object.values(pagesMap).forEach(page => {
-          if (page.extract && page.extract.trim().length > 0) {
-            combinedContext += `--- ARTICLE: ${page.title} ---\n${page.extract}\n\n`;
-            wikiPagesList.push({
-              title: page.title,
-              url: page.fullurl || `https://genshin-impact.fandom.com/wiki/${encodeURIComponent(page.title)}`
-            });
-          }
-        });
-
-        return {
-          contextText: combinedContext,
-          pages: wikiPagesList
-        };
-
-      } catch (err) {
-        console.warn("Wiki Fetching warning:", err);
-        return { contextText: "", pages: [] };
-      }
-    }
-
-    async function fetchActiveGroqModels(keyToUse = STATE.apiKey, showToasts = false) {
-      if (!keyToUse) return;
-      
-      const spinIcon = document.getElementById('detectSpinIcon');
-      if (spinIcon) spinIcon.classList.add('fa-spin');
-
-      try {
-        const res = await fetch("https://api.groq.com/openai/v1/models", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${keyToUse}`,
-            "Content-Type": "application/json"
-          }
-        });
-
-        if (!res.ok) {
-          throw new Error(`Groq Models API error (${res.status})`);
-        }
-
-        const data = await res.json();
-        const modelList = data.data || [];
-
-        // Filter out whisper/vision/audio/embedding/guard models, keeping text LLMs
-        const activeTextModels = modelList
-          .filter(m => m.active !== false && 
-                       !m.id.includes('whisper') && 
-                       !m.id.includes('vision') && 
-                       !m.id.includes('guard'))
-          .map(m => m.id)
-          .sort();
-
-        if (activeTextModels.length > 0) {
-          STATE.availableModels = activeTextModels;
-          populateModelSelectOptions(activeTextModels);
-
-          // Auto-healing logic: Check if stored model exists in current active list
-          if (!activeTextModels.includes(STATE.model)) {
-            const healedModel = activeTextModels.find(m => m.includes('llama-3.3-70b')) || 
-                                activeTextModels.find(m => m.includes('llama-3.1')) || 
-                                activeTextModels[0];
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div class="modal-content">
+            <h2>Observatory Settings</h2>
+            <label for="api-key">Groq API Key:</label>
+            <input type="password" id="api-key" placeholder="gsk_...">
             
-            STATE.model = healedModel;
-            localStorage.setItem('paimon_groq_model', healedModel);
-            if (showToasts) showToast(`Auto-healed model endpoint to: ${healedModel}`, 'info');
-          }
+            <label for="model-select">AI Model:</label>
+            <select id="model-select">
+                <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fast)</option>
+                <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Smart)</option>
+            </select>
+            
+            <button onclick="saveSettings()">Save & Close</button>
+            <div id="model-status" class="status"></div>
+        </div>
+    </div>
 
-          document.getElementById('modelLabelText').textContent = STATE.model;
-          document.getElementById('modelStatusHint').classList.remove('hidden');
+    <script>
+        // ==========================================
+        // 1. STARFIELD CANVAS LOGIC
+        // ==========================================
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
 
-          if (showToasts) showToast(`Successfully detected ${activeTextModels.length} active Groq models!`, 'success');
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
         }
 
-      } catch (err) {
-        console.warn("Auto-detection of Groq models failed, using standard list:", err);
-        populateModelSelectOptions(FALLBACK_MODELS);
-        if (showToasts) showToast("Could not query Groq models endpoint. Loaded default fallback models.", 'error');
-      } finally {
-        if (spinIcon) spinIcon.classList.remove('fa-spin');
-      }
-    }
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 400; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02
+                });
+            }
+        }
 
-    function populateModelSelectOptions(models) {
-      const select = document.getElementById('modelSelect');
-      if (!select) return;
-
-      select.innerHTML = '';
-      models.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m + (m === STATE.model ? ' (Active)' : '');
-        if (m === STATE.model) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-
-    function manualDetectModels() {
-      const key = document.getElementById('apiKeyInput').value.trim() || STATE.apiKey;
-      if (!key) {
-        showToast("Please enter a Groq API Key first!", 'error');
-        return;
-      }
-      fetchActiveGroqModels(key, true);
-    }
-
-    function handleApiKeyInputChange() {
-      const key = document.getElementById('apiKeyInput').value.trim();
-      if (key.startsWith('gsk_') && key.length > 20) {
-        fetchActiveGroqModels(key, false);
-      }
-    }
-
-    function handleModelSelectChange() {
-      const select = document.getElementById('modelSelect');
-      STATE.model = select.value;
-      document.getElementById('modelLabelText').textContent = STATE.model;
-    }
-
-    async function callGroqApi(userPrompt, wikiContext) {
-      if (!STATE.apiKey) {
-        openApiKeyModal();
-        throw new Error("Please enter your Groq API Key first!");
-      }
-
-      const systemPrompt = `
-You are Paimon, the emergency food and faithful companion from Genshin Impact!
-
-PAIMON PERSONALITY GUIDELINES:
-- Speak in the third person as "Paimon" (e.g., "Paimon thinks...", "Paimon is hungry!").
-- Speak enthusiastically, playfully, and dramatically! Use trademark phrases like "Traveler!", "Ehe te nandayo?!", "Mora", "Sticky Honey Roast", "Listen here!".
-- Express love for delicious food and shiny Mora!
-
-EXPRESSION TAG RULE:
-At the very beginning of your response, include one expression tag that best describes Paimon's mood:
-- [EXPRESSION: happy] (for exciting facts, recipes, food, treasures)
-- [EXPRESSION: thinking] (for complex lore explanations)
-- [EXPRESSION: eating] (when talking about food or eating)
-- [EXPRESSION: shocked] (when confused or when no wiki info was found)
-
-STRICT KNOWLEDGE & WIKI GROUNDING RULES:
-1. You MUST answer the Traveler's question STRICTLY based on the provided Genshin Impact Wiki Context below.
-2. If the Wiki Context contains relevant details, use them to form your response and explicitly mention the article titles referenced (e.g. "According to Paimon's archives on [Article Title]...").
-3. CRITICAL: If the Wiki Context is empty, off-topic, or does NOT contain enough details to answer the query, Paimon MUST explicitly state: "[EXPRESSION: shocked] Paimon searched high and low through the Celestial Star Archives, but Paimon couldn't find any information on that in the Genshin Wiki!" Do not invent facts or use non-Wiki lore!
-
-GENSHIN IMPACT WIKI ARCHIVES CONTEXT:
-${wikiContext || "NO WIKI MATCHES FOUND."}
-`;
-
-      const messages = [
-        { role: "system", content: systemPrompt },
-        ...STATE.chatHistory.slice(-4),
-        { role: "user", content: userPrompt }
-      ];
-
-      updateProgress("Paimon is formulating response...");
-
-      const activeModel = STATE.model || 'llama-3.3-70b-versatile';
-
-      let response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${STATE.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: activeModel,
-          messages: messages,
-          temperature: 0.6,
-          max_tokens: 1024
-        })
-      });
-
-      // If model failed or decommissioned, attempt dynamic auto-healing query
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        const errMsg = errJson.error?.message || `Groq API Error (${response.status})`;
-
-        if (errMsg.includes('decommissioned') || errMsg.includes('does not exist') || errMsg.includes('access')) {
-          showToast("Model unavailable! Attempting auto-healing...", 'info');
-          await fetchActiveGroqModels(STATE.apiKey, false);
-
-          if (STATE.availableModels.length > 0 && STATE.availableModels[0] !== activeModel) {
-            const fallbackModel = STATE.availableModels[0];
-            STATE.model = fallbackModel;
-            localStorage.setItem('paimon_groq_model', fallbackModel);
-            document.getElementById('modelLabelText').textContent = fallbackModel;
-
-            // Retry with healed model
-            response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${STATE.apiKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                model: fallbackModel,
-                messages: messages,
-                temperature: 0.6,
-                max_tokens: 1024
-              })
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            
+            stars.forEach(star => {
+                ctx.globalAlpha = star.alpha;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) star.speed *= -1;
             });
-          }
+            
+            requestAnimationFrame(animateStars);
         }
 
-        if (!response.ok) {
-          const retryErr = await response.json().catch(() => ({}));
-          throw new Error(retryErr.error?.message || errMsg);
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animateStars();
+
+        // ==========================================
+        // 2. SETTINGS & AUTO-HEALING LOGIC
+        // ==========================================
+        let apiKey = localStorage.getItem('groqApiKey') || '';
+        let activeModel = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
+        
+        document.getElementById('api-key').value = apiKey;
+        document.getElementById('model-select').value = activeModel;
+
+        function openModal() {
+            document.getElementById('settings-modal').style.display = 'flex';
         }
-      }
 
-      const data = await response.json();
-      return data.choices[0]?.message?.content || "Paimon got confused and couldn't answer!";
-    }
+        async function saveSettings() {
+            apiKey = document.getElementById('api-key').value.trim();
+            activeModel = document.getElementById('model-select').value;
+            
+            localStorage.setItem('groqApiKey', apiKey);
+            localStorage.setItem('groqModel', activeModel);
+            
+            if(apiKey) {
+                document.getElementById('model-status').innerText = "Refreshing active models...";
+                await fetchActiveGroqModels();
+            }
+            
+            document.getElementById('settings-modal').style.display = 'none';
+        }
 
-    const chatMessagesContainer = document.getElementById('chatMessages');
+        async function fetchActiveGroqModels() {
+            try {
+                const res = await fetch('https://api.groq.com/openai/v1/models', {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if(!res.ok) throw new Error("Invalid API Key");
+                const data = await res.json();
+                
+                const select = document.getElementById('model-select');
+                select.innerHTML = ''; // clear old
+                
+                // Filter only text models
+                const textModels = data.data.filter(m => !m.id.includes('whisper') && !m.id.includes('vision'));
+                textModels.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.innerText = m.id;
+                    if(m.id === activeModel) opt.selected = true;
+                    select.appendChild(opt);
+                });
+                
+                // Auto-heal if active model is decommissioned
+                if (!textModels.find(m => m.id === activeModel) && textModels.length > 0) {
+                    activeModel = textModels[0].id;
+                    localStorage.setItem('groqModel', activeModel);
+                }
+                
+                document.getElementById('model-status').innerText = "Models synced successfully!";
+            } catch(e) {
+                document.getElementById('model-status').innerText = "Failed to sync models. Check API Key.";
+            }
+        }
 
-    function renderUserMessage(text) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'flex items-start gap-3 justify-end max-w-2xl ml-auto';
-      msgDiv.innerHTML = `
-        <div class="flex flex-col items-end gap-1">
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] text-slate-400">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-            <span class="font-cinzel font-bold text-xs text-cyan-300">TRAVELER</span>
-          </div>
-          <div class="p-4 rounded-2xl bg-gradient-to-r from-cyan-950 to-slate-900 border border-cyan-500/30 text-slate-100 text-sm leading-relaxed shadow-lg">
-            ${escapeHtml(text)}
-          </div>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-cyan-400/20 border border-cyan-400/40 flex items-center justify-center shrink-0 text-cyan-300">
-          <i class="fa-solid fa-user-astronaut text-sm"></i>
-        </div>
-      `;
-      chatMessagesContainer.appendChild(msgDiv);
-      scrollToBottom();
-    }
+        // ==========================================
+        // 3. WIKI FETCH LOGIC (IMPROVED TWO-STEP)
+        // ==========================================
+        async function fetchGenshinWikiData(query) {
+            try {
+                // Step 1: Search for exact page title match
+                const searchUrl = `https://genshin-impact.fandom.com/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
+                const searchRes = await fetch(searchUrl);
+                const searchData = await searchRes.json();
+                
+                if (!searchData.query?.search?.length) return null;
 
-    function renderPaimonMessage(rawText, wikiPages = []) {
-      let displayResponse = rawText;
-      const tagMatch = rawText.match(/\[EXPRESSION:\s*(idle|happy|thinking|shocked|eating)\]/i);
+                const pageTitle = searchData.query.search[0].title;
 
-      if (tagMatch) {
-        const expressionName = tagMatch[1].toLowerCase();
-        setPaimonExpression(expressionName);
-        displayResponse = rawText.replace(/\[EXPRESSION:\s*(idle|happy|thinking|shocked|eating)\]/gi, '').trim();
-      }
+                // Step 2: Extract clean intro prose for the exact title
+                const extractUrl = `https://genshin-impact.fandom.com/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(pageTitle)}&format=json&origin=*`;
+                const extractRes = await fetch(extractUrl);
+                const extractData = await extractRes.json();
+                
+                const pages = extractData.query.pages;
+                const pageId = Object.keys(pages)[0];
+                
+                if (pageId == "-1") return null;
 
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'flex items-start gap-3.5 max-w-2xl';
+                let rawExtract = pages[pageId].extract || "";
+                // Clean and truncate context to prevent model confusion
+                let cleanExtract = rawExtract.replace(/<[^>]*>?/gm, '').slice(0, 1500);
+                
+                return {
+                    title: pageTitle,
+                    extract: cleanExtract,
+                    url: `https://genshin-impact.fandom.com/wiki/${encodeURIComponent(pageTitle.replace(/ /g, "_"))}`
+                };
+            } catch (err) {
+                console.error("Wiki Fetch Error:", err);
+                return null;
+            }
+        }
 
-      const parsedHtml = marked.parse(displayResponse);
+        // ==========================================
+        // 4. CHAT & LLM LOGIC
+        // ==========================================
+        let conversationHistory = [];
 
-      msgDiv.innerHTML = `
-        <div class="w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
-          <i class="fa-solid fa-crown text-sm"></i>
-        </div>
-        <div class="flex flex-col gap-1.5 flex-1">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="font-cinzel font-bold text-xs text-amber-300 tracking-wider">PAIMON</span>
-              <span class="text-[10px] text-slate-400">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-            </div>
-            <button onclick="copyToClipboard(\`${escapeForAttribute(displayResponse)}\`)" class="text-xs text-slate-400 hover:text-amber-300 transition-colors" title="Copy Answer">
-              <i class="fa-solid fa-copy"></i>
-            </button>
-          </div>
-          <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-slate-100 text-sm leading-relaxed shadow-lg prose">
-            ${parsedHtml}
-          </div>
-        </div>
-      `;
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
 
-      chatMessagesContainer.appendChild(msgDiv);
-      scrollToBottom();
+        function appendMessage(sender, text, wikiData = null) {
+            const chatHistory = document.getElementById('chat-history');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            
+            let htmlContent = text;
+            if (wikiData) {
+                htmlContent += `<a href="${wikiData.url}" target="_blank" class="wiki-source">🔗 Source: ${wikiData.title} (Genshin Wiki)</a>`;
+            }
+            
+            msgDiv.innerHTML = htmlContent;
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
 
-      speakPaimonText(displayResponse);
-    }
+        async function sendMessage() {
+            const inputEl = document.getElementById('chat-input');
+            const message = inputEl.value.trim();
+            if (!message) return;
 
-    function updateWikiSourcesDrawer(pages) {
-      const drawer = document.getElementById('wikiSourcesDrawer');
-      const container = document.getElementById('wikiSourcesContainer');
+            if (!apiKey) {
+                alert("Please set your Groq API Key in settings first!");
+                openModal();
+                return;
+            }
 
-      if (!pages || pages.length === 0) {
-        drawer.classList.add('hidden');
-        return;
-      }
+            // UI Update
+            appendMessage('user', message);
+            inputEl.value = '';
+            
+            const loadingId = 'loading-' + Date.now();
+            const chatHistory = document.getElementById('chat-history');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message paimon';
+            loadingDiv.id = loadingId;
+            loadingDiv.innerText = "Paimon is searching the archives...";
+            chatHistory.appendChild(loadingDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
 
-      container.innerHTML = pages.map(p => `
-        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 hover:bg-amber-500/20 text-xs transition-all">
-          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-cyan-400"></i>
-          <span>${escapeHtml(p.title)}</span>
-        </a>
-      `).join('');
+            try {
+                // 1. Fetch Wiki Context
+                const wikiData = await fetchGenshinWikiData(message);
+                
+                // 2. Build Strict System Prompt with Archons & Fallbacks
+                const systemPrompt = `You are Paimon from Genshin Impact! Speak in Paimon's energetic third-person voice.
 
-      drawer.classList.remove('hidden');
-    }
+FACT CHECK DIRECTIVES:
+1. Elemental Types: Pyro (Fire), Hydro (Water), Anemo (Wind), Electro (Lightning), Dendro (Nature), Cryo (Ice), Geo (Earth).
+2. The Seven Archons:
+   - Anemo: Venti (Barbatos)
+   - Geo: Zhongli (Morax)
+   - Electro: Raiden Shogun (Ei / Beelzebul)
+   - Dendro: Nahida (Buer)
+   - Hydro: Focalors / Furina (Note: Neuvillette, the Hydro Dragon, now holds the Hydro Authority)
+   - Pyro: Mavuika
+   - Cryo: The Tsaritsa
+3. Grounding Rules:
+   - Use the provided Wiki Extract for specific lore context.
+   - If the Wiki snippet lacks specific gameplay info (such as Neuvillette's best team synergies: Furina, Kazuha, Baizhu, Zhongli, Fischl), use your established Genshin Impact game knowledge to answer accurately. Never invent fictional elements like "storm element".
 
-    function toggleWikiDrawer() {
-      document.getElementById('wikiSourcesDrawer').classList.add('hidden');
-    }
+Wiki Context:
+${wikiData ? wikiData.extract : "No direct wiki entry found for this specific query."}`;
 
-    async function handleChatSubmit(e) {
-      if (e) e.preventDefault();
+                // 3. Format Messages
+                const messages = [
+                    { role: "system", content: systemPrompt },
+                    ...conversationHistory,
+                    { role: "user", content: message }
+                ];
 
-      const input = document.getElementById('userInput');
-      const query = input.value.trim();
-      if (!query) return;
+                // 4. Call Groq API
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: activeModel,
+                        messages: messages,
+                        temperature: 0.4, // Low temp prevents hallucination
+                        max_tokens: 800
+                    })
+                });
 
-      if (!STATE.apiKey) {
-        openApiKeyModal();
-        showToast("Groq API Key is required to ask Paimon!", 'error');
-        return;
-      }
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || "Unknown API Error");
+                }
 
-      input.value = '';
-      renderUserMessage(query);
+                const data = await response.json();
+                const paimonReply = data.choices[0].message.content;
 
-      const sendBtn = document.getElementById('sendBtn');
-      sendBtn.disabled = true;
+                // Update History
+                conversationHistory.push({ role: "user", content: message });
+                conversationHistory.push({ role: "assistant", content: paimonReply });
+                
+                // Keep history manageable (last 6 turns)
+                if(conversationHistory.length > 12) conversationHistory = conversationHistory.slice(-12);
 
-      setPaimonExpression('thinking');
-      showProgress(true);
+                // Update UI
+                document.getElementById(loadingId).remove();
+                appendMessage('paimon', paimonReply, wikiData);
 
-      try {
-        const { contextText, pages } = await fetchGenshinWikiContext(query);
-        STATE.lastWikiPages = pages;
-        updateWikiSourcesDrawer(pages);
-
-        const paimonResponse = await callGroqApi(query, contextText);
-
-        STATE.chatHistory.push({ role: "user", content: query });
-        STATE.chatHistory.push({ role: "assistant", content: paimonResponse });
-
-        renderPaimonMessage(paimonResponse, pages);
-
-      } catch (err) {
-        console.error(err);
-        setPaimonExpression('shocked');
-        renderPaimonMessage(`**Ehh?! Something went wrong!** Paimon got the following error: \`${err.message}\``);
-        showToast(err.message, 'error');
-      } finally {
-        showProgress(false);
-        sendBtn.disabled = false;
-      }
-    }
-
-    function sendQuickPrompt(promptText) {
-      document.getElementById('userInput').value = promptText;
-      handleChatSubmit();
-    }
-
-    function clearChat() {
-      STATE.chatHistory = [];
-      chatMessagesContainer.innerHTML = '';
-      document.getElementById('wikiSourcesDrawer').classList.add('hidden');
-      setPaimonExpression('idle');
-      showToast("Celestial Observatory Chat Cleared!", 'info');
-    }
-
-    function openApiKeyModal() {
-      document.getElementById('apiKeyInput').value = STATE.apiKey;
-      document.getElementById('apiKeyModal').classList.remove('hidden');
-      
-      if (STATE.apiKey) {
-        fetchActiveGroqModels(STATE.apiKey, false);
-      }
-    }
-
-    function closeApiKeyModal() {
-      document.getElementById('apiKeyModal').classList.add('hidden');
-    }
-
-    function toggleKeyVisibility() {
-      const input = document.getElementById('apiKeyInput');
-      const icon = document.getElementById('keyVisibilityIcon');
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'fa-solid fa-eye-slash';
-      } else {
-        input.type = 'password';
-        icon.className = 'fa-solid fa-eye';
-      }
-    }
-
-    function saveApiKeySettings() {
-      const key = document.getElementById('apiKeyInput').value.trim();
-      const model = document.getElementById('modelSelect').value;
-
-      STATE.apiKey = key;
-      STATE.model = model;
-
-      localStorage.setItem('paimon_groq_api_key', key);
-      localStorage.setItem('paimon_groq_model', model);
-
-      document.getElementById('modelLabelText').textContent = model;
-      updateApiKeyBtnText();
-
-      closeApiKeyModal();
-      showToast("Groq API Key & Active Model Saved!", 'success');
-      playCelestialChime();
-    }
-
-    function updateApiKeyBtnText() {
-      const btnText = document.getElementById('apiKeyBtnText');
-      if (STATE.apiKey) {
-        btnText.textContent = "API Configured ✓";
-      } else {
-        btnText.textContent = "Configure Groq API";
-      }
-    }
-
-    function updateProgress(text) {
-      document.getElementById('progressText').textContent = text;
-      playPaimonTextBlip();
-    }
-
-    function showProgress(show) {
-      const indicator = document.getElementById('progressIndicator');
-      if (show) {
-        indicator.classList.remove('hidden');
-      } else {
-        indicator.classList.add('hidden');
-      }
-    }
-
-    function scrollToBottom() {
-      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-    }
-
-    function copyToClipboard(text) {
-      const el = document.createElement('textarea');
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      showToast("Paimon's response copied to clipboard!", 'success');
-    }
-
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      
-      const colors = {
-        success: 'bg-emerald-950/90 border-emerald-400/40 text-emerald-200',
-        error: 'bg-rose-950/90 border-rose-400/40 text-rose-200',
-        info: 'bg-slate-900/90 border-amber-500/40 text-amber-200'
-      };
-
-      toast.className = `px-4 py-2.5 rounded-xl border ${colors[type]} text-xs shadow-xl flex items-center gap-2 transition-all transform translate-y-2 opacity-0 pointer-events-auto`;
-      toast.innerHTML = `
-        <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : (type === 'error' ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-info text-amber-400')}"></i>
-        <span>${escapeHtml(msg)}</span>
-      `;
-
-      container.appendChild(toast);
-
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 10);
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 3800);
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    function escapeForAttribute(str) {
-      return str.replace(/`/g, "\\`").replace(/"/g, "&quot;");
-    }
-
-    window.onload = function() {
-      resizeCanvas();
-      renderStarfield();
-
-      document.getElementById('modelLabelText').textContent = STATE.model;
-      updateApiKeyBtnText();
-
-      if (STATE.apiKey) {
-        fetchActiveGroqModels(STATE.apiKey, false);
-      } else {
-        populateModelSelectOptions(FALLBACK_MODELS);
-        setTimeout(() => {
-          openApiKeyModal();
-        }, 800);
-      }
-    };
-  </script>
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                appendMessage('paimon', `Ehh?! Something went wrong! Paimon got the following error: ${err.message}`);
+                
+                // Attempt Auto-Heal if model error
+                if(err.message.includes("does not exist") || err.message.includes("decommissioned")) {
+                    fetchActiveGroqModels();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
